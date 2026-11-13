@@ -1,0 +1,1846 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GT Sales Dashboard Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* ─────────────────────────────────────────────────────────────────
+   GT Sales Dashboard (portfolio demo): design tokens
+   Same system as the production dashboard: one typeface (Manrope), one
+   type scale, one cool accent for secondary sales and one warm note for
+   primary. Every chart mark takes its paint from a token, so the theme
+   toggle repaints without a redraw.
+   ───────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+  --plane: #eceff3;
+  --plane-2: #e3e8ee;
+  --surface: #ffffff;
+  --surface-2: #f1f4f7;
+  --ink: #141a21;
+  --ink-2: #4f5b6a;
+  --ink-3: #7e8a99;
+  --rule: #e0e6ec;
+  --rule-soft: #eaeff4;
+  --s1: #2f6aa8;      /* secondary: the accent */
+  --s2: #ad6a2e;      /* primary: the one warm note */
+  --accent-3: #e6eef7;
+  --ok: #3f7d5b;
+  --watch: #b2842f;
+  --behind: #b04a3c;
+  --zero: #9aa5b2;
+  --map-1: #e7ecf6; --map-2: #f3eadf; --map-3: #e6f0ea; --map-4: #efe6ef;
+  --banner: #1d2a3a; --banner-ink: #e8eef5;
+  --lift: 0 1px 2px rgba(20,26,33,.04), 0 20px 48px -24px rgba(20,26,33,.16);
+  --f: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --r: 24px;
+  --pad: 28px;
+  --gutter: 32px;
+  --shell-max: 1480px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --plane: #101418; --plane-2: #0b0e11; --surface: #191e24; --surface-2: #212831;
+    --ink: #eef2f6; --ink-2: #a9b5c2; --ink-3: #7b8794;
+    --rule: #2b333c; --rule-soft: #232a32;
+    --s1: #5b93cf; --s2: #c5843d; --accent-3: #21303e;
+    --ok: #4f9c72; --watch: #c99a3f; --behind: #c96253; --zero: #5d6875;
+    --map-1: #1d2632; --map-2: #2a2520; --map-3: #1c2a24; --map-4: #28202a;
+    --banner: #213246; --banner-ink: #e8eef5;
+    --lift: 0 1px 2px rgba(0,0,0,.5), 0 20px 48px -24px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plane: #101418; --plane-2: #0b0e11; --surface: #191e24; --surface-2: #212831;
+  --ink: #eef2f6; --ink-2: #a9b5c2; --ink-3: #7b8794;
+  --rule: #2b333c; --rule-soft: #232a32;
+  --s1: #5b93cf; --s2: #c5843d; --accent-3: #21303e;
+  --ok: #4f9c72; --watch: #c99a3f; --behind: #c96253; --zero: #5d6875;
+  --map-1: #1d2632; --map-2: #2a2520; --map-3: #1c2a24; --map-4: #28202a;
+  --banner: #213246; --banner-ink: #e8eef5;
+  --lift: 0 1px 2px rgba(0,0,0,.5), 0 20px 48px -24px rgba(0,0,0,.8);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--plane); color: var(--ink);
+  font-family: var(--f); font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--s1); outline-offset: 3px; border-radius: 6px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+
+/* type scale */
+.t-hero { font-size: 50px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.t-stat { font-size: 30px; font-weight: 700; letter-spacing: -.035em; line-height: 1.1; }
+.t-card { font-size: 16px; font-weight: 700; letter-spacing: -.011em; }
+.t-meta { font-size: 13px; color: var(--ink-3); line-height: 1.45; }
+.t-lbl { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.fig { font-variant-numeric: tabular-nums; }
+
+/* demo banner */
+.demo-banner {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px;
+  padding: 9px var(--gutter); background: var(--banner); color: var(--banner-ink);
+  font-size: 13px; text-align: center;
+}
+.demo-banner b { font-weight: 700; }
+.demo-banner a { color: inherit; text-underline-offset: 3px; }
+
+/* top dock */
+.topdock {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40;
+  background: color-mix(in srgb, var(--plane) 88%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--rule);
+}
+.topbar { display: flex; align-items: center; gap: 30px; padding: 0 var(--gutter); height: 70px; }
+.brand { display: flex; align-items: center; gap: 12px; flex: none; }
+.brand svg { height: 26px; width: auto; color: var(--ink); }
+.brand h1 { font-size: 20px; font-weight: 800; letter-spacing: .042em; text-transform: uppercase; white-space: nowrap; }
+.topnav { display: flex; gap: 26px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.topnav::-webkit-scrollbar { display: none; }
+.topnav a {
+  position: relative; flex: none; padding: 7px 0; color: var(--ink-3); text-decoration: none;
+  font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+.topnav a:hover { color: var(--ink); }
+.topnav a::after { content: ""; position: absolute; inset: auto 0 0 0; height: 2px; border-radius: 2px; background: transparent; }
+.topnav a[aria-current] { color: var(--s1); }
+.topnav a[aria-current]::after { background: var(--s1); }
+.bar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex: none; }
+.sync { white-space: nowrap; }
+.period { display: flex; align-items: center; gap: 3px; padding: 4px; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+.period button { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-2); }
+.period button:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+.period button:disabled { opacity: .35; cursor: not-allowed; }
+.period span { min-width: 84px; text-align: center; font-size: 14px; font-weight: 700; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 16px; border: 1px solid var(--rule); border-radius: 12px;
+  background: var(--surface); font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--ink-3); }
+.btn.icon { width: 40px; padding: 0; }
+.btn[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--plane); }
+.btn .count { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--s1); color: #fff; font-size: 12px; font-weight: 700; }
+
+/* filter bar */
+.filterbar { padding: 0 var(--gutter); }
+.filterbar[hidden] { display: none; }
+.filter-inner { max-width: calc(var(--shell-max) - var(--gutter) * 2); margin: 0 auto; padding-block: 14px 16px; display: grid; gap: 12px; }
+.filter-panel {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;
+  padding: 20px 24px; border: 1px solid var(--rule); border-radius: 20px; background: var(--surface); box-shadow: var(--lift);
+}
+.field { display: grid; gap: 7px; min-width: 0; }
+.field select, .ctl select {
+  width: 100%; height: 40px; padding: 0 10px; border: 1px solid var(--rule); border-radius: 11px;
+  background: var(--surface-2); color: var(--ink); font-size: 14px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px 0 13px;
+  border: 0; border-radius: 999px; background: var(--accent-3); color: var(--s1); font-size: 13px; font-weight: 600;
+}
+.chip button { border: 0; background: transparent; color: inherit; opacity: .6; padding: 0 3px; }
+.chip button:hover { opacity: 1; }
+.chip-clear { border: 0; background: transparent; color: var(--ink-3); font-size: 13px; font-weight: 600; }
+.chip-clear:hover { color: var(--behind); text-decoration: underline; }
+
+/* layout */
+.shell { max-width: var(--shell-max); margin: 0 auto; padding: 28px var(--gutter) 110px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; }
+.shell > section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; min-width: 0; scroll-margin-top: 96px; }
+.chart-box { overflow-x: auto; min-width: 0; }
+.card {
+  min-width: 0; padding: var(--pad); border: 1px solid var(--rule); border-radius: var(--r);
+  background: var(--surface); box-shadow: var(--lift); display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start;
+}
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.card-head > div:first-child { display: grid; gap: 3px; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.ctl { display: grid; gap: 6px; }
+.ctl select { height: 36px; min-width: 130px; }
+.row-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.row-map { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; }
+.tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; }
+
+/* hero achievement cards */
+.hero { gap: 18px; }
+.hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hero-pct { display: inline-flex; align-items: baseline; gap: 8px; padding: 6px 12px; border-radius: 10px; background: var(--surface-2); }
+.hero-pct b { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+.hero-pct .cap { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.ok { color: var(--ok); } .watch { color: var(--watch); } .behind { color: var(--behind); } .neutral { color: var(--ink-3); }
+.hero-money { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.hero-money .cap { font-size: 15px; font-weight: 600; color: var(--ink-3); }
+.abar { position: relative; height: 6px; border-radius: 6px; background: var(--surface-2); margin-top: 6px; }
+.abar > i { position: absolute; inset: 0 auto 0 0; border-radius: 6px; }
+.abar .mark { position: absolute; top: -5px; width: 2px; height: 16px; background: var(--ink-2); border-radius: 2px; }
+.abar .pace { position: absolute; top: -4px; width: 2px; height: 14px; background: var(--ink-3); opacity: .55; }
+.abar-scale { margin-top: 5px; display: flex; justify-content: flex-end; gap: 0; position: relative; height: 14px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; color: var(--ink-3); }
+.abar-scale span { position: absolute; transform: translateX(-50%); }
+.abar-scale span:last-child { transform: translateX(-100%); }
+.facts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); margin: 0; }
+.facts > div { display: grid; gap: 4px; padding-inline: 16px; }
+.facts > div:first-child { padding-left: 0; }
+.facts > div + div { border-left: 1px solid var(--rule); }
+.facts dt { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.facts dd { margin: 0; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.facts dd small { font-size: 13px; color: var(--ink-3); font-weight: 500; }
+
+.tile { padding: 22px 24px; gap: 10px; }
+.tile .t-stat { font-variant-numeric: tabular-nums; }
+.up { color: var(--ok); } .down { color: var(--behind); }
+
+/* segmented control */
+.seg { display: inline-flex; padding: 4px; gap: 2px; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface-2); }
+.seg button { height: 30px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-3); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg button small { margin-left: 6px; font-weight: 700; color: var(--ink-3); }
+
+/* tables */
+.tbl-wrap { overflow: auto; max-height: 520px; margin-inline: -6px; padding-inline: 6px; overscroll-behavior: contain; }
+.tbl-wrap.tall { max-height: 620px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead th {
+  position: sticky; top: 0; z-index: 1; background: var(--surface);
+  padding: 10px 12px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+}
+thead th button { border: 0; background: none; padding: 0; font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+thead th button:hover { color: var(--ink); }
+thead th[aria-sort] button { color: var(--ink); }
+thead th .arr { margin-left: 4px; opacity: .45; }
+thead th[aria-sort] .arr { opacity: 1; }
+th.l, td.l { text-align: left; }
+tbody td { padding: 11px 12px; border-bottom: 1px solid var(--rule-soft); text-align: right; font-variant-numeric: tabular-nums; vertical-align: middle; }
+tbody tr:hover td { background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+td.who b, td.who { font-weight: 600; }
+td.who span, td.sub span { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); }
+td.rank { color: var(--ink-3); width: 36px; text-align: left; }
+td.wrap { white-space: normal; min-width: 180px; }
+td.nowrap { white-space: nowrap; }
+.tbl-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 13px; font-weight: 600; }
+.pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.pill.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.pill.watch { background: color-mix(in srgb, var(--watch) 16%, transparent); }
+.pill.behind { background: color-mix(in srgb, var(--behind) 13%, transparent); }
+.pill.neutral { background: var(--surface-2); }
+.inbar { display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 150px; }
+.inbar .bt { width: 70px; height: 5px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.inbar .bt i { display: block; height: 100%; border-radius: 5px; }
+.inbar span { min-width: 48px; text-align: right; }
+.tbl-action { height: 30px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 9px; background: var(--surface-2); font-size: 12.5px; font-weight: 600; }
+.tbl-action:hover { border-color: var(--ink-3); }
+
+/* charts */
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { fill: var(--ink-3); font-size: 11px; font-family: var(--f); }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .lbl-strong { fill: var(--ink); font-weight: 700; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.tip {
+  position: fixed; z-index: 80; pointer-events: none; padding: 8px 11px; border-radius: 10px;
+  background: var(--ink); color: var(--plane); font-size: 12.5px; line-height: 1.45; box-shadow: var(--lift);
+  font-variant-numeric: tabular-nums; max-width: 260px;
+}
+.tip b { font-weight: 700; }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stat { padding: 14px 16px; border-radius: 14px; background: var(--surface-2); display: grid; gap: 3px; }
+.stat b { font-size: 19px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+
+/* delivery */
+.status-list { display: grid; gap: 14px; }
+.status-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; }
+.status-row .bt { grid-column: 1 / -1; height: 8px; border-radius: 8px; background: var(--surface-2); overflow: hidden; }
+.status-row .bt i { display: block; height: 100%; }
+.age-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.age { padding: 16px; border-radius: 14px; background: var(--surface-2); display: grid; gap: 6px; align-content: start; }
+.age .col { height: 70px; display: flex; align-items: flex-end; }
+.age .col i { display: block; width: 100%; border-radius: 6px 6px 2px 2px; background: var(--behind); min-height: 2px; }
+
+/* map */
+.map-wrap { position: relative; border: 1px solid var(--rule); border-radius: 18px; background: var(--surface-2); overflow: hidden; }
+.map-tools { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; z-index: 2; }
+.map-svg { display: block; width: 100%; height: 700px; }
+.map-svg .div-shape { stroke: var(--surface); stroke-width: 1.2; }
+.map-svg .div-name { fill: var(--ink); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-anchor: middle; paint-order: stroke; stroke: var(--surface-2); stroke-width: 3px; }
+.map-svg .div-count { fill: var(--ink-2); font-size: 10px; text-anchor: middle; paint-order: stroke; stroke: var(--surface-2); stroke-width: 3px; }
+.map-svg .pin { stroke: var(--surface); stroke-width: .8; cursor: pointer; }
+.map-svg .div-shape, .map-svg .pin { vector-effect: non-scaling-stroke; }
+.map-svg .pin:hover, .map-svg .pin.sel { stroke: var(--ink); stroke-width: 1.4; }
+.map-legend { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 12px; flex-wrap: wrap; padding: 7px 11px; border-radius: 10px; background: color-mix(in srgb, var(--surface) 90%, transparent); font-size: 12px; color: var(--ink-2); }
+.map-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.map-credit { position: absolute; right: 12px; bottom: 12px; font-size: 10.5px; color: var(--ink-3); }
+.shop-panel { display: grid; gap: 16px; align-content: start; }
+.shop-empty { display: grid; place-items: center; min-height: 160px; text-align: center; color: var(--ink-3); font-size: 14px; border: 1px dashed var(--rule); border-radius: 16px; padding: 20px; }
+.kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.split-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--rule-soft); }
+.split-row .bt { grid-column: 1 / -1; height: 5px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.split-row .bt i { display: block; height: 100%; background: var(--s1); }
+
+/* modal */
+.modal-back { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(10, 14, 18, .45); }
+.modal-back[hidden] { display: none; }
+.modal { width: min(720px, 100%); max-height: 86vh; overflow: auto; }
+
+/* footer */
+.foot { max-width: var(--shell-max); margin: 0 auto; padding: 0 var(--gutter) 60px; color: var(--ink-3); font-size: 13px; display: grid; gap: 6px; }
+
+/* responsive */
+@media (max-width: 1320px) {
+  .topbar { flex-wrap: wrap; height: auto; padding-block: 12px; row-gap: 8px; }
+  .topnav { order: 3; width: 100%; }
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1000px) {
+  .row-2, .row-map { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  :root { --gutter: 16px; --pad: 20px; --r: 18px; }
+  .t-hero { font-size: 38px; }
+  .brand h1 { font-size: 16px; }
+  .sync { display: none; }
+  .topbar { gap: 10px; }
+  .bar-right { margin-left: 0; width: 100%; flex-wrap: wrap; }
+  .chart { min-width: 620px; }
+  .map-tools { position: static; padding: 10px; }
+  .map-svg { height: 480px; }
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .facts { grid-auto-flow: row; gap: 10px; }
+  .facts > div { padding: 0; }
+  .facts > div + div { border-left: 0; }
+  .age-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kv { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+
+</style>
+</head>
+<body>
+<div class="demo-banner" role="note">
+  <span><b>Portfolio demo.</b> Every name and number on this page is synthetic, produced by a seeded generator. No company data is shown.</span>
+</div>
+
+<div class="topdock">
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 28 26" aria-hidden="true"><path d="M3 23V12M10 23V6M17 23V14M24 23V3" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" fill="none"/></svg>
+      <h1>GT Sales Dashboard</h1>
+    </div>
+    <nav class="topnav" aria-label="Dashboard sections">
+      <a href="#performance">Performance</a>
+      <a href="#delivery">Order &amp; Delivery</a>
+      <a href="#stock">Stock</a>
+      <a href="#coverage">Coverage</a>
+    </nav>
+    <div class="bar-right">
+      <span class="t-meta sync" id="sync"></span>
+      <button class="btn" id="filters-btn" type="button" aria-expanded="false" aria-controls="filterbar">Filters</button>
+      <div class="period" role="group" aria-label="Period">
+        <button type="button" id="prev-month" aria-label="Previous month">&#8249;</button>
+        <span id="period-label" aria-live="polite"></span>
+        <button type="button" id="next-month" aria-label="Next month">&#8250;</button>
+      </div>
+      <button class="btn icon" id="theme-btn" type="button" aria-label="Toggle light or dark theme" title="Theme">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+  <div class="filterbar" id="filterbar">
+    <div class="filter-inner">
+      <div class="filter-panel" id="filter-panel" hidden></div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+  <section id="pulse" aria-label="Headline KPIs">
+    <div class="row-2" id="hero"></div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section id="performance" aria-label="Performance">
+    <div class="card" id="leaderboard"></div>
+    <div class="card" id="brands"></div>
+    <div class="card" id="blocks"></div>
+    <div class="card" id="trend"></div>
+  </section>
+
+  <section id="delivery" aria-label="Order and delivery">
+    <div class="card" id="orders"></div>
+    <div class="row-2">
+      <div class="card" id="completion"></div>
+      <div class="card" id="ageing"></div>
+    </div>
+    <div class="card" id="timing"></div>
+  </section>
+
+  <section id="stock" aria-label="Stock">
+    <div class="card" id="stock-sku"></div>
+    <div class="card" id="cover-plan"></div>
+  </section>
+
+  <section id="coverage" aria-label="Coverage">
+    <div class="card" id="coverage-card"></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span>Portfolio replica of a production analytics dashboard. Same layout, metrics and logic as the original, running entirely in the browser on synthetic data.</span>
+  <span>Map: division boundaries from Natural Earth (public domain). No external map tiles.</span>
+</footer>
+
+<div class="modal-back" id="modal" hidden></div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+/* Bangladesh administrative divisions (seven polygons; Mymensingh sits inside Dhaka).
+   Source: Natural Earth 10m admin-1 states/provinces (naturalearthdata.com), public domain.
+   Simplified (Douglas-Peucker, ~350 m) and rounded to 3 decimal places.
+   Public geographic reference data only. No business data lives in this file. */
+(function (root) {
+  var geo = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"name":"Barisal","label":[90.35,22.35]},"geometry":{"type":"MultiPolygon","coordinates":[[[[90.45,23.049],[90.468,22.996],[90.507,22.942],[90.51,22.918],[90.521,22.916],[90.54,22.897],[90.535,22.887],[90.52,22.88],[90.476,22.884],[90.457,22.862],[90.436,22.801],[90.408,22.795],[90.424,22.782],[90.42,22.768],[90.406,22.763],[90.394,22.775],[90.373,22.761],[90.435,22.733],[90.445,22.752],[90.462,22.749],[90.49,22.72],[90.497,22.679],[90.509,22.646],[90.513,22.612],[90.5,22.592],[90.459,22.579],[90.442,22.494],[90.445,22.504],[90.463,22.521],[90.461,22.551],[90.473,22.576],[90.505,22.586],[90.524,22.583],[90.56,22.562],[90.578,22.534],[90.607,22.466],[90.586,22.473],[90.586,22.451],[90.618,22.377],[90.614,22.315],[90.582,22.238],[90.558,22.203],[90.538,22.199],[90.501,22.177],[90.488,22.139],[90.46,22.092],[90.439,22.076],[90.409,22.086],[90.388,22.103],[90.393,22.127],[90.418,22.175],[90.422,22.199],[90.408,22.24],[90.414,22.272],[90.411,22.284],[90.394,22.288],[90.399,22.268],[90.389,22.223],[90.391,22.209],[90.411,22.196],[90.413,22.178],[90.397,22.161],[90.393,22.143],[90.38,22.144],[90.37,22.09],[90.332,22.038],[90.309,21.984],[90.3,21.928],[90.283,21.871],[90.273,21.857],[90.204,21.805],[90.164,21.804],[90.093,21.83],[90.089,21.847],[90.095,21.859],[90.113,21.856],[90.105,21.87],[90.126,21.901],[90.121,21.922],[90.126,21.932],[90.099,21.879],[90.067,21.853],[90.049,21.851],[90.036,21.861],[90.024,21.863],[90.031,21.889],[90.034,21.944],[90.045,21.966],[90.077,21.988],[90.086,22],[90.096,22.04],[90.106,22.054],[90.147,22.089],[90.164,22.113],[90.173,22.117],[90.195,22.11],[90.216,22.123],[90.232,22.146],[90.239,22.172],[90.236,22.199],[90.206,22.133],[90.192,22.123],[90.165,22.12],[90.148,22.111],[90.089,22.051],[90.052,21.989],[90.028,21.988],[89.996,22],[90.011,22.041],[90.035,22.06],[90.035,22.105],[90.043,22.131],[90.073,22.152],[90.078,22.164],[90.053,22.156],[90.04,22.138],[90.024,22.089],[89.983,22.045],[89.983,21.987],[89.968,21.975],[89.95,21.981],[89.934,21.998],[89.915,22.062],[89.912,22.136],[89.901,22.202],[89.88,22.24],[89.877,22.275],[89.9,22.334],[89.983,22.445],[89.998,22.481],[90.01,22.49],[89.98,22.47],[89.967,22.5],[89.947,22.512],[89.96,22.556],[89.96,22.578],[89.953,22.6],[89.931,22.616],[89.919,22.646],[89.902,22.664],[89.907,22.672],[89.926,22.669],[89.93,22.686],[89.916,22.696],[89.891,22.698],[89.884,22.706],[89.928,22.739],[89.913,22.756],[89.911,22.769],[89.932,22.788],[89.924,22.799],[89.932,22.815],[89.948,22.817],[89.962,22.827],[89.929,22.87],[89.981,22.879],[89.995,22.886],[90.044,22.941],[90.063,22.975],[90.108,23.02],[90.127,23.029],[90.144,23.063],[90.192,23.072],[90.212,23.066],[90.221,23.051],[90.229,23.009],[90.249,22.987],[90.275,22.974],[90.299,22.982],[90.327,23.021],[90.326,23.038],[90.318,23.044],[90.292,23.043],[90.301,23.059],[90.313,23.066],[90.327,23.072],[90.36,23.065],[90.396,23.036],[90.422,23.025],[90.439,23.034],[90.45,23.049]]],[[[90.594,21.987],[90.594,21.966],[90.607,21.939],[90.591,21.935],[90.581,21.913],[90.566,21.918],[90.541,21.876],[90.521,21.862],[90.504,21.863],[90.504,21.87],[90.532,21.877],[90.51,21.898],[90.517,21.905],[90.515,21.921],[90.522,21.939],[90.594,21.987]]],[[[90.332,21.939],[90.354,21.977],[90.371,21.995],[90.394,22],[90.391,21.978],[90.366,21.939],[90.342,21.86],[90.323,21.844],[90.319,21.846],[90.319,21.893],[90.332,21.939]]],[[[90.388,22.048],[90.381,22.023],[90.353,21.993],[90.346,21.972],[90.34,21.972],[90.359,22.023],[90.374,22.046],[90.388,22.048]]],[[[90.435,22.041],[90.473,22.004],[90.486,21.977],[90.476,21.945],[90.455,21.933],[90.432,21.908],[90.416,21.901],[90.402,21.907],[90.395,21.922],[90.394,21.939],[90.412,21.976],[90.416,22.038],[90.429,22.048],[90.435,22.041]]],[[[90.544,22.062],[90.538,22.069],[90.484,22.035],[90.492,22.08],[90.503,22.096],[90.534,22.11],[90.56,22.138],[90.573,22.137],[90.593,22.159],[90.614,22.164],[90.594,22.103],[90.586,22.131],[90.56,22.024],[90.538,22],[90.52,21.995],[90.509,21.999],[90.504,22.024],[90.544,22.062]]],[[[90.942,22.205],[90.951,22.213],[90.957,22.199],[90.957,22.145],[90.949,22.122],[90.929,22.117],[90.919,22.132],[90.92,22.16],[90.936,22.213],[90.942,22.205]]],[[[90.976,22.186],[90.977,22.239],[90.983,22.259],[90.997,22.254],[90.998,22.235],[90.988,22.195],[90.976,22.186]]],[[[90.953,22.227],[90.937,22.233],[90.957,22.278],[90.96,22.323],[90.966,22.347],[90.976,22.363],[90.99,22.341],[90.994,22.302],[90.99,22.281],[90.953,22.227]]],[[[90.62,22.425],[90.601,22.429],[90.602,22.448],[90.614,22.449],[90.633,22.432],[90.659,22.38],[90.661,22.356],[90.648,22.384],[90.64,22.366],[90.647,22.326],[90.64,22.309],[90.635,22.318],[90.633,22.35],[90.64,22.35],[90.62,22.425]]],[[[90.648,22.425],[90.654,22.484],[90.661,22.48],[90.665,22.469],[90.667,22.439],[90.648,22.425]]],[[[90.791,22.495],[90.855,22.435],[90.835,22.34],[90.836,22.178],[90.828,22.152],[90.775,22.076],[90.757,22.062],[90.75,22.076],[90.718,22.048],[90.692,22.007],[90.658,21.993],[90.648,21.994],[90.639,22.016],[90.682,22.103],[90.626,22.027],[90.61,22.024],[90.604,22.044],[90.608,22.072],[90.633,22.123],[90.622,22.145],[90.632,22.182],[90.679,22.283],[90.682,22.36],[90.688,22.378],[90.678,22.427],[90.682,22.445],[90.671,22.464],[90.659,22.524],[90.648,22.548],[90.575,22.599],[90.559,22.603],[90.554,22.64],[90.556,22.675],[90.586,22.768],[90.614,22.782],[90.651,22.787],[90.684,22.694],[90.716,22.638],[90.747,22.597],[90.755,22.548],[90.767,22.518],[90.791,22.495]]],[[[90.645,22.849],[90.678,22.808],[90.662,22.806],[90.591,22.814],[90.532,22.769],[90.53,22.744],[90.535,22.729],[90.521,22.712],[90.498,22.734],[90.493,22.753],[90.456,22.767],[90.464,22.779],[90.463,22.834],[90.473,22.865],[90.487,22.87],[90.538,22.867],[90.544,22.881],[90.592,22.882],[90.607,22.877],[90.627,22.857],[90.645,22.849]]],[[[90.667,22.953],[90.633,22.953],[90.655,22.937],[90.667,22.918],[90.636,22.921],[90.62,22.933],[90.599,22.959],[90.589,22.962],[90.562,22.952],[90.524,22.953],[90.508,22.976],[90.528,23.008],[90.561,23.033],[90.586,23.035],[90.645,22.975],[90.667,22.959],[90.667,22.953]]],[[[90.51,23.069],[90.517,23.059],[90.516,23.052],[90.47,23.008],[90.456,23.063],[90.494,23.063],[90.51,23.069]]]]}},{"type":"Feature","properties":{"name":"Chittagong","label":[92.03,22.771]},"geometry":{"type":"MultiPolygon","coordinates":[[[[92.641,21.309],[92.643,21.298],[92.634,21.282],[92.614,21.263],[92.591,21.249],[92.571,21.247],[92.559,21.26],[92.544,21.321],[92.525,21.361],[92.499,21.367],[92.465,21.36],[92.4,21.371],[92.381,21.385],[92.368,21.435],[92.355,21.452],[92.323,21.462],[92.285,21.419],[92.236,21.417],[92.225,21.398],[92.212,21.355],[92.184,21.317],[92.178,21.3],[92.185,21.24],[92.175,21.176],[92.188,21.144],[92.212,21.124],[92.224,21.093],[92.265,21.061],[92.257,20.981],[92.262,20.94],[92.272,20.904],[92.305,20.852],[92.308,20.833],[92.333,20.768],[92.334,20.746],[92.326,20.739],[92.319,20.742],[92.301,20.762],[92.278,20.814],[92.21,20.931],[92.193,20.996],[92.134,21.048],[92.097,21.106],[92.053,21.155],[92.044,21.192],[92.052,21.257],[92.045,21.3],[91.99,21.394],[91.969,21.41],[91.953,21.442],[91.95,21.458],[91.963,21.452],[91.983,21.489],[91.999,21.5],[92.018,21.493],[91.995,21.523],[91.99,21.562],[92.022,21.599],[92.018,21.616],[92.036,21.64],[92.032,21.65],[92.038,21.66],[92.036,21.668],[92.023,21.677],[92.029,21.705],[92.025,21.713],[92.018,21.699],[92.025,21.699],[92.012,21.664],[92.001,21.65],[91.984,21.65],[91.976,21.662],[91.984,21.705],[91.977,21.705],[91.972,21.688],[91.963,21.69],[91.95,21.716],[91.953,21.738],[91.975,21.747],[91.99,21.76],[91.984,21.767],[91.967,21.755],[91.96,21.764],[91.967,21.779],[91.99,21.788],[91.99,21.795],[91.944,21.791],[91.909,21.781],[91.899,21.79],[91.901,21.813],[91.911,21.835],[91.929,21.843],[91.922,21.853],[91.926,21.863],[91.95,21.877],[91.95,21.884],[91.93,21.879],[91.916,21.863],[91.898,21.945],[91.881,21.969],[91.881,22.007],[91.855,22.109],[91.854,22.144],[91.867,22.137],[91.862,22.151],[91.853,22.149],[91.846,22.136],[91.846,22.117],[91.84,22.117],[91.819,22.156],[91.813,22.18],[91.817,22.22],[91.84,22.247],[91.838,22.263],[91.812,22.281],[91.809,22.306],[91.827,22.318],[91.874,22.336],[91.885,22.354],[91.908,22.425],[91.888,22.425],[91.878,22.363],[91.844,22.335],[91.799,22.312],[91.791,22.302],[91.794,22.286],[91.826,22.268],[91.826,22.249],[91.809,22.236],[91.787,22.238],[91.772,22.26],[91.754,22.375],[91.744,22.411],[91.676,22.535],[91.548,22.7],[91.516,22.712],[91.499,22.727],[91.477,22.761],[91.469,22.757],[91.462,22.762],[91.458,22.797],[91.468,22.809],[91.49,22.881],[91.491,22.905],[91.483,22.905],[91.462,22.833],[91.453,22.823],[91.43,22.816],[91.417,22.8],[91.412,22.778],[91.415,22.754],[91.385,22.771],[91.346,22.775],[91.346,22.767],[91.367,22.762],[91.37,22.752],[91.36,22.743],[91.291,22.738],[91.333,22.72],[91.33,22.706],[91.317,22.697],[91.284,22.692],[91.245,22.698],[91.243,22.72],[91.182,22.727],[91.199,22.699],[91.192,22.692],[91.169,22.692],[91.169,22.685],[91.253,22.661],[91.265,22.641],[91.261,22.628],[91.242,22.575],[91.221,22.557],[91.203,22.543],[91.127,22.527],[91.089,22.544],[91.07,22.572],[91.059,22.614],[91.018,22.683],[91.004,22.679],[91.019,22.665],[91.032,22.637],[91.04,22.608],[91.038,22.589],[91.018,22.579],[90.955,22.576],[90.942,22.586],[90.936,22.6],[90.908,22.618],[90.884,22.655],[90.877,22.683],[90.866,22.687],[90.836,22.685],[90.82,22.727],[90.795,22.741],[90.774,22.778],[90.75,22.857],[90.726,22.906],[90.718,22.941],[90.64,23.038],[90.629,23.064],[90.627,23.087],[90.639,23.148],[90.64,23.189],[90.665,23.249],[90.661,23.268],[90.667,23.268],[90.651,23.3],[90.65,23.314],[90.661,23.322],[90.653,23.325],[90.654,23.33],[90.628,23.322],[90.611,23.343],[90.599,23.391],[90.6,23.45],[90.609,23.473],[90.633,23.487],[90.692,23.487],[90.715,23.498],[90.716,23.535],[90.711,23.549],[90.702,23.555],[90.743,23.591],[90.736,23.602],[90.74,23.61],[90.768,23.618],[90.77,23.623],[90.735,23.659],[90.752,23.688],[90.745,23.701],[90.722,23.722],[90.76,23.802],[90.756,23.838],[90.76,23.854],[90.785,23.871],[90.823,23.871],[90.85,23.88],[90.891,23.86],[90.914,23.875],[90.952,23.923],[90.973,23.965],[90.978,23.99],[90.974,24.009],[90.982,24.032],[91.03,24.072],[91.037,24.093],[91.018,24.104],[91.025,24.118],[91.007,24.142],[91.004,24.166],[91.033,24.176],[91.066,24.218],[91.08,24.209],[91.094,24.207],[91.095,24.237],[91.14,24.248],[91.153,24.256],[91.236,24.217],[91.261,24.213],[91.301,24.242],[91.319,24.246],[91.332,24.241],[91.328,24.231],[91.281,24.199],[91.281,24.194],[91.317,24.18],[91.282,24.169],[91.273,24.154],[91.285,24.122],[91.294,24.057],[91.299,24.041],[91.313,24.025],[91.308,23.993],[91.292,23.995],[91.261,23.977],[91.216,23.908],[91.213,23.881],[91.228,23.845],[91.225,23.826],[91.195,23.755],[91.142,23.74],[91.132,23.721],[91.137,23.699],[91.169,23.685],[91.175,23.67],[91.167,23.654],[91.14,23.654],[91.136,23.63],[91.141,23.612],[91.17,23.562],[91.195,23.495],[91.227,23.469],[91.248,23.394],[91.258,23.374],[91.287,23.356],[91.266,23.329],[91.277,23.303],[91.301,23.142],[91.314,23.101],[91.337,23.071],[91.371,23.063],[91.375,23.096],[91.356,23.18],[91.356,23.224],[91.361,23.248],[91.372,23.262],[91.394,23.263],[91.414,23.249],[91.437,23.215],[91.44,23.224],[91.446,23.216],[91.446,23.198],[91.464,23.184],[91.503,23.044],[91.518,23.035],[91.524,22.995],[91.537,22.982],[91.577,22.969],[91.586,22.945],[91.602,22.953],[91.617,22.978],[91.626,22.982],[91.647,22.977],[91.707,22.995],[91.738,23.025],[91.755,23.048],[91.756,23.062],[91.776,23.065],[91.796,23.09],[91.779,23.132],[91.764,23.201],[91.749,23.232],[91.744,23.272],[91.763,23.322],[91.818,23.401],[91.834,23.414],[91.905,23.447],[91.941,23.495],[91.942,23.534],[91.916,23.65],[91.914,23.688],[91.923,23.723],[91.937,23.724],[92.004,23.647],[92.019,23.64],[92.042,23.646],[92.06,23.66],[92.108,23.718],[92.151,23.732],[92.171,23.704],[92.181,23.665],[92.194,23.648],[92.209,23.662],[92.222,23.708],[92.239,23.717],[92.259,23.707],[92.262,23.685],[92.25,23.643],[92.253,23.609],[92.291,23.495],[92.302,23.432],[92.325,23.404],[92.327,23.375],[92.349,23.354],[92.347,23.315],[92.358,23.279],[92.333,23.226],[92.328,23.171],[92.353,23.03],[92.352,22.96],[92.36,22.927],[92.379,22.9],[92.412,22.888],[92.426,22.871],[92.442,22.763],[92.481,22.726],[92.496,22.696],[92.503,22.619],[92.501,22.561],[92.517,22.513],[92.577,22.169],[92.576,22.143],[92.549,22.139],[92.537,22.129],[92.56,22.061],[92.593,21.887],[92.576,21.734],[92.593,21.47],[92.603,21.42],[92.641,21.309]]],[[[91.936,21.76],[91.939,21.715],[91.975,21.649],[91.984,21.609],[91.97,21.524],[91.961,21.506],[91.895,21.507],[91.9,21.486],[91.877,21.481],[91.863,21.495],[91.855,21.52],[91.871,21.548],[91.874,21.582],[91.869,21.622],[91.848,21.689],[91.854,21.726],[91.872,21.755],[91.883,21.754],[91.898,21.743],[91.903,21.73],[91.888,21.685],[91.903,21.703],[91.91,21.727],[91.901,21.774],[91.936,21.781],[91.936,21.76]]],[[[91.888,21.866],[91.87,21.825],[91.863,21.79],[91.841,21.735],[91.833,21.726],[91.824,21.743],[91.84,21.826],[91.833,21.877],[91.843,21.907],[91.867,21.932],[91.888,21.866]]],[[[91.149,22.357],[91.157,22.332],[91.171,22.32],[91.181,22.284],[91.187,22.228],[91.142,22.146],[91.106,22.122],[91.094,22.119],[91.082,22.101],[91.063,22.09],[91.023,22.095],[91.011,22.102],[91.005,22.117],[91.034,22.149],[91.059,22.192],[91.068,22.241],[91.075,22.389],[91.092,22.391],[91.127,22.375],[91.149,22.357]]],[[[91.159,22.503],[91.2,22.515],[91.211,22.496],[91.201,22.472],[91.16,22.451],[91.134,22.45],[91.114,22.461],[91.124,22.489],[91.159,22.503]]],[[[91.468,22.586],[91.556,22.478],[91.564,22.436],[91.555,22.402],[91.508,22.397],[91.476,22.413],[91.447,22.453],[91.43,22.493],[91.424,22.525],[91.447,22.576],[91.468,22.586]]]]}},{"type":"Feature","properties":{"name":"Dhaka","label":[90.43,24.474]},"geometry":{"type":"MultiPolygon","coordinates":[[[[89.799,25.403],[89.795,25.374],[89.799,25.34],[89.807,25.305],[89.819,25.285],[89.835,25.282],[89.87,25.296],[89.908,25.297],[90.13,25.212],[90.287,25.18],[90.365,25.15],[90.4,25.149],[90.501,25.169],[90.583,25.162],[90.623,25.171],[90.708,25.153],[90.722,25.157],[90.738,25.169],[90.754,25.168],[90.794,25.145],[90.822,25.142],[90.935,25.156],[90.932,25.113],[90.947,25.07],[90.946,25.056],[90.924,25.015],[90.912,24.979],[90.978,24.881],[91.007,24.869],[91.125,24.88],[91.145,24.815],[91.149,24.77],[91.142,24.718],[91.148,24.7],[91.203,24.699],[91.213,24.694],[91.223,24.674],[91.207,24.625],[91.184,24.615],[91.184,24.607],[91.208,24.576],[91.231,24.563],[91.218,24.53],[91.188,24.484],[91.203,24.471],[91.226,24.465],[91.23,24.43],[91.214,24.419],[91.242,24.394],[91.249,24.379],[91.226,24.357],[91.239,24.337],[91.184,24.309],[91.169,24.275],[91.153,24.256],[91.14,24.248],[91.095,24.237],[91.094,24.207],[91.08,24.209],[91.066,24.218],[91.033,24.176],[91.004,24.166],[91.007,24.142],[91.025,24.118],[91.018,24.104],[91.037,24.093],[91.03,24.072],[90.982,24.032],[90.974,24.009],[90.978,23.99],[90.973,23.965],[90.952,23.923],[90.914,23.875],[90.891,23.86],[90.85,23.88],[90.823,23.871],[90.785,23.871],[90.76,23.854],[90.756,23.838],[90.76,23.802],[90.722,23.722],[90.745,23.701],[90.752,23.688],[90.735,23.659],[90.77,23.623],[90.768,23.618],[90.74,23.61],[90.736,23.602],[90.743,23.591],[90.702,23.555],[90.678,23.555],[90.676,23.551],[90.702,23.528],[90.695,23.508],[90.667,23.518],[90.608,23.491],[90.603,23.495],[90.588,23.534],[90.592,23.563],[90.608,23.586],[90.633,23.597],[90.627,23.604],[90.62,23.597],[90.612,23.606],[90.596,23.604],[90.559,23.59],[90.565,23.576],[90.559,23.568],[90.547,23.564],[90.515,23.564],[90.476,23.583],[90.484,23.568],[90.498,23.557],[90.532,23.549],[90.569,23.548],[90.577,23.54],[90.579,23.45],[90.56,23.418],[90.552,23.385],[90.518,23.398],[90.322,23.433],[90.284,23.446],[90.25,23.467],[90.249,23.455],[90.259,23.445],[90.389,23.372],[90.404,23.36],[90.429,23.326],[90.46,23.32],[90.504,23.302],[90.569,23.295],[90.577,23.288],[90.607,23.247],[90.615,23.196],[90.594,23.22],[90.603,23.141],[90.599,23.118],[90.572,23.082],[90.566,23.076],[90.554,23.079],[90.556,23.097],[90.566,23.104],[90.566,23.111],[90.559,23.111],[90.537,23.087],[90.523,23.08],[90.454,23.072],[90.443,23.038],[90.422,23.025],[90.396,23.036],[90.36,23.065],[90.327,23.072],[90.301,23.059],[90.292,23.043],[90.318,23.044],[90.326,23.038],[90.324,23.016],[90.299,22.982],[90.275,22.974],[90.249,22.987],[90.229,23.009],[90.221,23.051],[90.212,23.066],[90.192,23.072],[90.144,23.063],[90.127,23.029],[90.108,23.02],[90.063,22.975],[90.044,22.941],[89.995,22.886],[89.981,22.879],[89.929,22.87],[89.888,22.89],[89.86,22.918],[89.833,22.932],[89.819,22.967],[89.757,23.028],[89.723,23.09],[89.698,23.097],[89.685,23.11],[89.681,23.138],[89.711,23.119],[89.734,23.154],[89.753,23.162],[89.756,23.171],[89.751,23.18],[89.737,23.185],[89.708,23.17],[89.695,23.172],[89.68,23.189],[89.681,23.227],[89.628,23.24],[89.668,23.289],[89.638,23.288],[89.613,23.315],[89.598,23.353],[89.599,23.385],[89.627,23.371],[89.599,23.473],[89.579,23.49],[89.548,23.506],[89.519,23.509],[89.503,23.487],[89.497,23.5],[89.497,23.514],[89.526,23.538],[89.51,23.547],[89.493,23.58],[89.421,23.675],[89.411,23.679],[89.353,23.672],[89.309,23.729],[89.36,23.853],[89.36,23.881],[89.345,23.921],[89.378,23.9],[89.49,23.853],[89.53,23.82],[89.556,23.815],[89.62,23.844],[89.698,23.854],[89.685,23.927],[89.702,23.98],[89.8,24.056],[89.817,24.084],[89.82,24.119],[89.83,24.136],[89.83,24.186],[89.826,24.195],[89.808,24.199],[89.807,24.227],[89.756,24.275],[89.749,24.361],[89.76,24.48],[89.768,24.511],[89.766,24.562],[89.782,24.585],[89.789,24.61],[89.784,24.642],[89.797,24.699],[89.796,24.72],[89.791,24.738],[89.776,24.758],[89.701,24.808],[89.679,24.853],[89.653,24.969],[89.659,25.053],[89.682,25.16],[89.704,25.202],[89.74,25.248],[89.746,25.273],[89.737,25.328],[89.768,25.392],[89.799,25.403]]],[[[90.524,23.322],[90.506,23.314],[90.487,23.319],[90.437,23.362],[90.427,23.376],[90.43,23.385],[90.456,23.385],[90.539,23.35],[90.578,23.324],[90.586,23.302],[90.53,23.334],[90.524,23.322]]]]}},{"type":"Feature","properties":{"name":"Khulna","label":[89.404,22.747]},"geometry":{"type":"MultiPolygon","coordinates":[[[[89.06,22.13],[89.078,22.151],[89.076,22.175],[89.062,22.212],[89.019,22.265],[89.009,22.286],[89.024,22.295],[89.002,22.334],[88.99,22.387],[88.992,22.407],[89.003,22.428],[88.998,22.451],[88.98,22.491],[88.971,22.528],[88.928,22.548],[88.95,22.562],[88.956,22.585],[88.952,22.612],[88.93,22.659],[88.908,22.741],[88.937,22.782],[88.945,22.815],[88.945,22.848],[88.933,22.858],[88.905,22.866],[88.894,22.88],[88.872,22.927],[88.839,22.976],[88.849,23.024],[88.851,23.075],[88.865,23.1],[88.955,23.184],[88.96,23.203],[88.954,23.207],[88.918,23.209],[88.823,23.238],[88.81,23.236],[88.786,23.222],[88.776,23.222],[88.71,23.241],[88.697,23.252],[88.687,23.272],[88.686,23.293],[88.719,23.348],[88.768,23.467],[88.77,23.489],[88.757,23.499],[88.732,23.473],[88.719,23.468],[88.705,23.495],[88.665,23.518],[88.648,23.535],[88.624,23.574],[88.609,23.589],[88.571,23.592],[88.562,23.602],[88.566,23.629],[88.542,23.639],[88.54,23.65],[88.561,23.741],[88.553,23.775],[88.578,23.819],[88.578,23.855],[88.594,23.867],[88.653,23.87],[88.714,23.925],[88.714,23.964],[88.702,23.995],[88.726,24.029],[88.725,24.038],[88.701,24.044],[88.698,24.056],[88.679,24.071],[88.674,24.083],[88.683,24.124],[88.678,24.154],[88.694,24.175],[88.732,24.19],[88.736,24.175],[88.758,24.148],[88.805,24.122],[88.825,24.119],[88.908,24.151],[88.931,24.172],[88.96,24.167],[88.977,24.156],[89.037,24.095],[89.046,24.071],[89.07,24.038],[89.068,23.997],[89.116,23.956],[89.16,23.934],[89.187,23.929],[89.27,23.937],[89.322,23.93],[89.345,23.921],[89.36,23.881],[89.36,23.853],[89.309,23.729],[89.312,23.72],[89.353,23.672],[89.411,23.679],[89.421,23.675],[89.493,23.58],[89.51,23.547],[89.526,23.538],[89.497,23.514],[89.497,23.5],[89.503,23.487],[89.519,23.509],[89.548,23.506],[89.579,23.49],[89.599,23.473],[89.627,23.371],[89.599,23.385],[89.598,23.353],[89.613,23.315],[89.638,23.288],[89.668,23.289],[89.628,23.24],[89.681,23.227],[89.68,23.189],[89.695,23.172],[89.708,23.17],[89.737,23.185],[89.751,23.18],[89.756,23.171],[89.753,23.162],[89.734,23.154],[89.711,23.119],[89.681,23.138],[89.685,23.11],[89.698,23.097],[89.723,23.09],[89.757,23.028],[89.819,22.967],[89.833,22.932],[89.86,22.918],[89.888,22.89],[89.929,22.87],[89.962,22.827],[89.948,22.817],[89.932,22.815],[89.924,22.799],[89.932,22.788],[89.911,22.769],[89.913,22.756],[89.928,22.739],[89.884,22.706],[89.891,22.698],[89.916,22.696],[89.93,22.686],[89.926,22.669],[89.907,22.672],[89.902,22.664],[89.919,22.646],[89.931,22.616],[89.956,22.593],[89.96,22.556],[89.946,22.517],[89.95,22.508],[89.967,22.5],[89.98,22.47],[89.934,22.424],[89.92,22.392],[89.903,22.396],[89.873,22.419],[89.884,22.364],[89.88,22.342],[89.839,22.268],[89.861,22.211],[89.873,22.144],[89.871,22.092],[89.863,22.079],[89.846,22.071],[89.797,22.076],[89.797,22.069],[89.836,22.05],[89.848,22.034],[89.852,22.01],[89.846,21.972],[89.887,21.9],[89.88,21.884],[89.851,21.878],[89.814,21.841],[89.786,21.829],[89.776,21.828],[89.766,21.847],[89.726,21.829],[89.709,21.83],[89.673,21.84],[89.661,21.849],[89.653,21.879],[89.663,21.896],[89.647,21.925],[89.619,21.87],[89.65,21.826],[89.701,21.785],[89.69,21.765],[89.668,21.751],[89.632,21.764],[89.596,21.76],[89.593,21.754],[89.606,21.719],[89.587,21.701],[89.566,21.713],[89.537,21.754],[89.539,21.772],[89.527,21.813],[89.53,21.836],[89.565,21.884],[89.564,21.973],[89.571,22.031],[89.577,22.052],[89.601,22.091],[89.606,22.113],[89.594,22.155],[89.568,22.189],[89.567,22.203],[89.606,22.257],[89.611,22.299],[89.627,22.336],[89.616,22.328],[89.581,22.277],[89.577,22.269],[89.586,22.245],[89.549,22.205],[89.55,22.192],[89.576,22.146],[89.579,22.113],[89.567,22.082],[89.551,21.994],[89.533,21.985],[89.525,22],[89.523,22.045],[89.537,22.089],[89.492,22.188],[89.493,22.274],[89.483,22.295],[89.476,22.295],[89.468,22.229],[89.476,22.103],[89.483,22.103],[89.494,22.137],[89.518,22.081],[89.509,22.041],[89.492,22.035],[89.49,22.024],[89.522,21.962],[89.513,21.909],[89.476,21.877],[89.465,21.859],[89.47,21.804],[89.466,21.781],[89.443,21.747],[89.406,21.717],[89.395,21.716],[89.37,21.743],[89.363,21.784],[89.366,21.829],[89.384,21.878],[89.387,21.901],[89.36,21.972],[89.352,21.972],[89.346,21.957],[89.36,21.918],[89.356,21.893],[89.329,21.865],[89.301,21.809],[89.296,21.809],[89.291,21.822],[89.284,21.822],[89.284,21.797],[89.295,21.758],[89.291,21.733],[89.274,21.699],[89.277,21.688],[89.298,21.678],[89.269,21.654],[89.229,21.644],[89.211,21.654],[89.204,21.673],[89.208,21.691],[89.219,21.699],[89.221,21.709],[89.19,21.791],[89.188,21.812],[89.183,21.816],[89.174,21.81],[89.155,21.787],[89.119,21.801],[89.105,21.816],[89.08,21.897],[89.078,21.914],[89.092,22],[89.057,22.065],[89.064,22.111],[89.06,22.13]]],[[[89.116,21.781],[89.139,21.767],[89.145,21.739],[89.133,21.722],[89.102,21.737],[89.052,21.793],[89.064,21.822],[89.064,21.842],[89.046,21.917],[89.057,21.918],[89.068,21.904],[89.081,21.823],[89.093,21.793],[89.116,21.781]]]]}},{"type":"Feature","properties":{"name":"Rajshahi","label":[89.169,24.658]},"geometry":{"type":"MultiPolygon","coordinates":[[[[88.732,24.19],[88.75,24.223],[88.738,24.287],[88.715,24.315],[88.682,24.334],[88.66,24.338],[88.635,24.294],[88.613,24.293],[88.563,24.308],[88.475,24.316],[88.401,24.369],[88.139,24.495],[88.11,24.501],[88.086,24.537],[88.082,24.6],[88.067,24.614],[88.057,24.634],[88.022,24.646],[88.027,24.676],[88.049,24.711],[88.053,24.755],[88.077,24.761],[88.084,24.771],[88.088,24.796],[88.095,24.803],[88.108,24.801],[88.141,24.845],[88.138,24.864],[88.115,24.916],[88.165,24.941],[88.183,24.947],[88.202,24.945],[88.233,24.918],[88.242,24.899],[88.243,24.881],[88.314,24.868],[88.376,24.946],[88.388,24.969],[88.391,24.995],[88.414,25.022],[88.426,25.051],[88.434,25.117],[88.432,25.173],[88.441,25.19],[88.475,25.195],[88.559,25.171],[88.599,25.193],[88.634,25.192],[88.725,25.167],[88.784,25.161],[88.792,25.167],[88.803,25.188],[88.817,25.197],[88.899,25.169],[88.924,25.168],[88.91,25.189],[88.928,25.193],[88.929,25.229],[88.982,25.275],[88.983,25.295],[88.975,25.303],[89.182,25.3],[89.224,25.29],[89.227,25.252],[89.252,25.201],[89.284,25.173],[89.351,25.208],[89.506,25.166],[89.605,25.166],[89.682,25.16],[89.659,25.053],[89.653,24.969],[89.679,24.853],[89.701,24.808],[89.776,24.758],[89.791,24.738],[89.796,24.72],[89.797,24.699],[89.784,24.642],[89.789,24.61],[89.782,24.585],[89.766,24.562],[89.768,24.511],[89.76,24.48],[89.749,24.371],[89.756,24.275],[89.807,24.227],[89.808,24.199],[89.826,24.195],[89.833,24.166],[89.83,24.136],[89.82,24.119],[89.817,24.084],[89.8,24.056],[89.702,23.98],[89.685,23.927],[89.698,23.854],[89.62,23.844],[89.556,23.815],[89.53,23.82],[89.49,23.853],[89.468,23.865],[89.378,23.9],[89.322,23.93],[89.27,23.937],[89.187,23.929],[89.16,23.934],[89.116,23.956],[89.068,23.997],[89.07,24.038],[89.066,24.047],[89.046,24.071],[89.033,24.1],[88.969,24.162],[88.951,24.171],[88.931,24.172],[88.908,24.151],[88.825,24.119],[88.805,24.122],[88.758,24.148],[88.736,24.175],[88.732,24.19]]]]}},{"type":"Feature","properties":{"name":"Rangpur","label":[89.13,25.68]},"geometry":{"type":"MultiPolygon","coordinates":[[[[89.809,25.44],[89.799,25.403],[89.768,25.392],[89.737,25.328],[89.746,25.273],[89.74,25.248],[89.704,25.202],[89.682,25.16],[89.605,25.166],[89.506,25.166],[89.351,25.208],[89.284,25.173],[89.252,25.201],[89.227,25.252],[89.224,25.29],[89.182,25.3],[88.927,25.301],[88.903,25.303],[88.88,25.324],[88.849,25.327],[88.818,25.36],[88.81,25.388],[88.8,25.396],[88.816,25.437],[88.815,25.459],[88.772,25.502],[88.742,25.513],[88.743,25.495],[88.706,25.492],[88.678,25.466],[88.666,25.463],[88.645,25.467],[88.594,25.495],[88.53,25.5],[88.513,25.524],[88.486,25.543],[88.475,25.563],[88.438,25.58],[88.424,25.592],[88.419,25.654],[88.393,25.681],[88.32,25.725],[88.26,25.789],[88.228,25.804],[88.183,25.792],[88.146,25.776],[88.128,25.775],[88.088,25.831],[88.089,25.849],[88.074,25.908],[88.088,25.923],[88.107,25.98],[88.126,26.013],[88.151,26.031],[88.156,26.061],[88.141,26.076],[88.14,26.085],[88.156,26.129],[88.164,26.141],[88.197,26.16],[88.219,26.18],[88.309,26.206],[88.326,26.216],[88.335,26.231],[88.337,26.282],[88.367,26.313],[88.414,26.34],[88.432,26.362],[88.449,26.353],[88.498,26.353],[88.496,26.378],[88.475,26.432],[88.461,26.454],[88.435,26.465],[88.377,26.475],[88.354,26.485],[88.347,26.484],[88.343,26.477],[88.336,26.448],[88.323,26.452],[88.315,26.465],[88.314,26.482],[88.332,26.515],[88.353,26.579],[88.373,26.612],[88.385,26.624],[88.394,26.618],[88.398,26.559],[88.411,26.545],[88.462,26.529],[88.527,26.475],[88.55,26.467],[88.591,26.461],[88.612,26.431],[88.656,26.415],[88.652,26.392],[88.669,26.386],[88.667,26.368],[88.71,26.341],[88.712,26.328],[88.703,26.31],[88.646,26.276],[88.663,26.264],[88.748,26.293],[88.784,26.28],[88.808,26.233],[88.825,26.227],[88.841,26.232],[88.856,26.265],[88.876,26.277],[88.903,26.273],[88.947,26.233],[88.975,26.224],[89.02,26.235],[89.04,26.247],[89.034,26.266],[89.012,26.269],[89.004,26.276],[89.008,26.297],[88.99,26.289],[88.982,26.292],[88.966,26.329],[88.912,26.349],[88.892,26.369],[88.891,26.386],[88.912,26.421],[88.941,26.439],[88.987,26.413],[89.011,26.39],[89.044,26.381],[89.057,26.363],[89.055,26.347],[89.096,26.335],[89.103,26.327],[89.104,26.314],[89.095,26.31],[89.069,26.314],[89.069,26.287],[89.103,26.225],[89.112,26.165],[89.119,26.147],[89.132,26.134],[89.213,26.099],[89.238,26.058],[89.273,26.044],[89.297,26.018],[89.335,25.999],[89.352,25.997],[89.38,26.015],[89.391,26.016],[89.411,25.993],[89.486,25.999],[89.495,25.995],[89.518,25.962],[89.528,25.957],[89.542,25.96],[89.549,25.969],[89.559,26.022],[89.603,26.055],[89.611,26.072],[89.604,26.085],[89.577,26.083],[89.567,26.087],[89.567,26.099],[89.604,26.121],[89.569,26.13],[89.563,26.143],[89.573,26.161],[89.587,26.169],[89.614,26.164],[89.606,26.211],[89.613,26.219],[89.635,26.226],[89.653,26.223],[89.658,26.208],[89.656,26.161],[89.67,26.154],[89.707,26.154],[89.719,26.146],[89.729,26.114],[89.75,26.084],[89.75,26.042],[89.756,26.032],[89.789,25.988],[89.796,25.986],[89.814,25.996],[89.829,25.979],[89.826,25.966],[89.792,25.949],[89.834,25.932],[89.83,25.908],[89.787,25.839],[89.783,25.814],[89.802,25.725],[89.824,25.674],[89.834,25.635],[89.825,25.565],[89.823,25.489],[89.809,25.44]]]]}},{"type":"Feature","properties":{"name":"Sylhet","label":[91.651,24.689]},"geometry":{"type":"MultiPolygon","coordinates":[[[[92.15,24.542],[92.111,24.514],[92.106,24.495],[92.111,24.434],[92.108,24.406],[92.088,24.382],[92.063,24.371],[92.033,24.369],[91.95,24.375],[91.949,24.364],[91.971,24.33],[91.972,24.316],[91.922,24.345],[91.9,24.338],[91.896,24.32],[91.907,24.28],[91.906,24.261],[91.877,24.158],[91.865,24.151],[91.844,24.155],[91.814,24.183],[91.807,24.221],[91.733,24.234],[91.723,24.221],[91.733,24.164],[91.721,24.149],[91.704,24.143],[91.684,24.146],[91.666,24.156],[91.64,24.212],[91.629,24.215],[91.614,24.14],[91.597,24.105],[91.559,24.09],[91.518,24.085],[91.405,24.103],[91.363,24.1],[91.351,24.074],[91.349,24.036],[91.339,23.995],[91.327,23.988],[91.308,23.993],[91.313,24.025],[91.299,24.041],[91.294,24.057],[91.285,24.122],[91.273,24.154],[91.282,24.169],[91.317,24.18],[91.281,24.194],[91.281,24.199],[91.328,24.231],[91.332,24.241],[91.319,24.246],[91.301,24.242],[91.261,24.213],[91.236,24.217],[91.153,24.256],[91.169,24.275],[91.184,24.309],[91.239,24.337],[91.226,24.357],[91.249,24.379],[91.242,24.394],[91.214,24.419],[91.23,24.43],[91.226,24.465],[91.203,24.471],[91.188,24.484],[91.218,24.53],[91.231,24.563],[91.208,24.576],[91.184,24.607],[91.184,24.615],[91.207,24.625],[91.223,24.674],[91.213,24.694],[91.203,24.699],[91.148,24.7],[91.142,24.718],[91.149,24.77],[91.145,24.815],[91.125,24.88],[91.007,24.869],[90.978,24.881],[90.912,24.979],[90.924,25.015],[90.946,25.056],[90.947,25.07],[90.932,25.113],[90.935,25.156],[90.975,25.168],[91.135,25.191],[91.203,25.191],[91.236,25.202],[91.284,25.179],[91.432,25.138],[91.481,25.135],[91.523,25.145],[91.549,25.161],[91.566,25.16],[91.596,25.129],[91.639,25.124],[91.662,25.127],[91.672,25.137],[91.677,25.153],[91.711,25.145],[91.73,25.168],[91.794,25.165],[91.901,25.178],[91.956,25.17],[92.002,25.183],[92.034,25.182],[92.093,25.165],[92.116,25.139],[92.151,25.13],[92.173,25.132],[92.208,25.098],[92.234,25.085],[92.304,25.074],[92.328,25.048],[92.381,25.023],[92.387,24.995],[92.412,24.987],[92.454,24.958],[92.458,24.953],[92.45,24.946],[92.484,24.928],[92.495,24.895],[92.492,24.884],[92.478,24.864],[92.381,24.837],[92.364,24.841],[92.358,24.854],[92.29,24.891],[92.252,24.903],[92.223,24.891],[92.218,24.875],[92.235,24.825],[92.234,24.778],[92.183,24.647],[92.164,24.559],[92.15,24.542]]]]}}]};
+  if (typeof module === "object" && module.exports) module.exports = geo;
+  else root.BD_DIVISIONS = geo;
+})(typeof self !== "undefined" ? self : this);
+
+</script>
+<script>
+/* ─────────────────────────────────────────────────────────────────────────────
+   Synthetic data generator for the GT Sales Dashboard portfolio demo.
+
+   Every record this file produces is invented. No row, name, price, target or
+   figure is copied, sampled, scaled or perturbed from the production system:
+   the generator only reproduces the *shape* of a general-trade (GT) sales
+   operation, meaning distributors that sell to retail shops, sales reps (SRs)
+   who collect orders, monthly targets split into 10-day blocks, deliveries that
+   lag orders, primary sales from the company to its distributors, and
+   distributor stock.
+
+   It is deterministic: the same seed always yields the same dataset, so a
+   screenshot, a CSV export and the live demo all agree with each other.
+
+   Works in the browser (window.SyntheticData) and in Node (module.exports).
+   ───────────────────────────────────────────────────────────────────────────── */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.SyntheticData = api;
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  /* ── seeded randomness ─────────────────────────────────────────────────── */
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6d2b79f5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeRandom(seed) {
+    var next = mulberry32(seed);
+    var r = {
+      next: next,
+      between: function (lo, hi) { return lo + (hi - lo) * next(); },
+      int: function (lo, hi) { return Math.floor(lo + (hi - lo + 1) * next()); },
+      pick: function (list) { return list[Math.floor(next() * list.length)]; },
+      chance: function (p) { return next() < p; },
+      normal: function () {
+        var u = 1 - next(), v = next();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      },
+      lognormal: function (mu, sigma) { return Math.exp(mu + sigma * r.normal()); },
+      weighted: function (items, weightOf) {
+        var total = 0, i;
+        for (i = 0; i < items.length; i++) total += weightOf(items[i]);
+        var roll = next() * total;
+        for (i = 0; i < items.length; i++) {
+          roll -= weightOf(items[i]);
+          if (roll <= 0) return items[i];
+        }
+        return items[items.length - 1];
+      },
+    };
+    return r;
+  }
+
+  /* ── calendar ──────────────────────────────────────────────────────────── */
+  // The demo is frozen mid-month so the in-progress views (run rate, days
+  // left, the third 10-day block, undelivered ageing) all have something to show.
+  var AS_OF = "2026-09-24";
+  var AS_OF_HOUR = 17;
+  var MONTHS = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"];
+  // Demand multipliers by month: a slow January, a festive-season peak in
+  // spring, a soft August. Invented, but shaped like a consumer-goods year.
+  var SEASON = [0.66, 0.92, 0.97, 1.28, 1.06, 1.17, 1.0, 0.74, 1.12];
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function iso(date) { return date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate()); }
+  function parse(day) { var p = day.split("-"); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])); }
+  function addDays(day, n) { var d = parse(day); d.setUTCDate(d.getUTCDate() + n); return iso(d); }
+  function daysInMonth(month) { var p = month.split("-"); return new Date(Date.UTC(+p[0], +p[1], 0)).getUTCDate(); }
+  // Friday is the weekly holiday for this field force.
+  function isWorkingDay(day) { return parse(day).getUTCDay() !== 5; }
+
+  /* ── reference data (all fictional) ────────────────────────────────────── */
+  // A footprint chosen for the demo: towns spread across all seven divisions.
+  var TERRITORIES = [
+    { id: "T-MTJ", name: "Motijheel", division: "Dhaka", lat: 23.733, lon: 90.418, spread: 0.028, weight: 14 },
+    { id: "T-BAN", name: "Banani", division: "Dhaka", lat: 23.794, lon: 90.403, spread: 0.026, weight: 12 },
+    { id: "T-MOH", name: "Mohammadpur", division: "Dhaka", lat: 23.766, lon: 90.358, spread: 0.026, weight: 11 },
+    { id: "T-JAT", name: "Jatrabari", division: "Dhaka", lat: 23.71, lon: 90.435, spread: 0.03, weight: 8 },
+    { id: "T-TON", name: "Tongi", division: "Dhaka", lat: 23.89, lon: 90.4, spread: 0.035, weight: 6 },
+    { id: "T-KER", name: "Keraniganj", division: "Dhaka", lat: 23.7, lon: 90.34, spread: 0.035, weight: 5 },
+    { id: "T-NAR", name: "Narsingdi", division: "Dhaka", lat: 23.92, lon: 90.72, spread: 0.05, weight: 3 },
+    { id: "T-TAN", name: "Tangail", division: "Dhaka", lat: 24.25, lon: 89.92, spread: 0.06, weight: 3 },
+    { id: "T-AGR", name: "Agrabad", division: "Chattogram", lat: 22.325, lon: 91.81, spread: 0.05, weight: 8 },
+    { id: "T-FEN", name: "Feni", division: "Chattogram", lat: 23.01, lon: 91.4, spread: 0.06, weight: 3 },
+    { id: "T-NAT", name: "Natore", division: "Rajshahi", lat: 24.42, lon: 88.99, spread: 0.06, weight: 3 },
+    { id: "T-SIR", name: "Sirajganj", division: "Rajshahi", lat: 24.45, lon: 89.7, spread: 0.06, weight: 3 },
+    { id: "T-KUS", name: "Kushtia", division: "Khulna", lat: 23.9, lon: 89.12, spread: 0.06, weight: 3 },
+    { id: "T-SAT", name: "Satkhira", division: "Khulna", lat: 22.72, lon: 89.07, spread: 0.06, weight: 2 },
+    { id: "T-MOU", name: "Moulvibazar", division: "Sylhet", lat: 24.48, lon: 91.77, spread: 0.06, weight: 3 },
+    { id: "T-DIN", name: "Dinajpur", division: "Rangpur", lat: 25.63, lon: 88.64, spread: 0.06, weight: 3 },
+    { id: "T-PAT", name: "Patuakhali", division: "Barishal", lat: 22.36, lon: 90.33, spread: 0.06, weight: 2.5 },
+  ];
+
+  var DISTRIBUTORS = [
+    ["D-01", "Crescent Trading", "T-MTJ"],
+    ["D-02", "Lakeside Distribution", "T-BAN"],
+    ["D-03", "Northgate Enterprise", "T-MOH"],
+    ["D-04", "Riverbank Traders", "T-JAT"],
+    ["D-05", "Greenline Supply", "T-TON"],
+    ["D-06", "Harbour Point Distribution", "T-KER"],
+    ["D-07", "Meadowfield Traders", "T-NAR"],
+    ["D-08", "Hillside Trading", "T-TAN"],
+    ["D-09", "Bay Gateway Enterprise", "T-AGR"],
+    ["D-10", "Coastal Link Distribution", "T-FEN"],
+    ["D-11", "Silk Road Distribution", "T-NAT"],
+    ["D-12", "Northern Star Traders", "T-SIR"],
+    ["D-13", "Riverside Supply", "T-KUS"],
+    ["D-14", "Mangrove Gate Enterprise", "T-SAT"],
+    ["D-15", "Tea Garden Distribution", "T-MOU"],
+    ["D-16", "Highland Valley Traders", "T-DIN"],
+    ["D-17", "Southern Delta Supply", "T-PAT"],
+  ];
+
+  // Pseudonyms: first name and initial only, invented for the demo.
+  var SUPERVISORS = [
+    ["SUP-1", "Nadia K."],
+    ["SUP-2", "Imran C."],
+    ["SUP-3", "Farhan A."],
+    ["SUP-4", "Sabrina H."],
+  ];
+  var SR_NAMES = [
+    "Tanvir A.", "Rakib H.", "Shuvo D.", "Mitu R.", "Arif S.", "Jamal U.", "Sumon B.", "Rumana P.",
+    "Kamal T.", "Nayeem F.", "Sohag M.", "Liton G.", "Polash N.", "Nila J.", "Babul Q.", "Shakil V.",
+    "Mahin W.", "Tuhin E.", "Ripa L.", "Hasib O.", "Fahim Y.", "Zakir I.", "Mou Z.", "Rasel X.",
+  ];
+  // Which supervisor covers which distributors (regional split).
+  var SUPERVISOR_OF = {
+    "D-01": "SUP-1", "D-02": "SUP-1", "D-03": "SUP-2", "D-04": "SUP-1", "D-05": "SUP-2", "D-06": "SUP-2",
+    "D-07": "SUP-2", "D-08": "SUP-2", "D-09": "SUP-3", "D-10": "SUP-3", "D-11": "SUP-4", "D-12": "SUP-4",
+    "D-13": "SUP-4", "D-14": "SUP-4", "D-15": "SUP-3", "D-16": "SUP-4", "D-17": "SUP-1",
+  };
+
+  // An everyday-grocery portfolio invented for the demo.
+  var BRANDS = [
+    { id: "B-NFT", name: "Northfield Tea", weight: 0.3 },
+    { id: "B-QBW", name: "QuickBowl", weight: 0.18 },
+    { id: "B-GLO", name: "Goldleaf Oil", weight: 0.12 },
+    { id: "B-CRN", name: "Crunchos", weight: 0.11 },
+    { id: "B-SUN", name: "Sunny Valley", weight: 0.1 },
+    { id: "B-BRW", name: "Brightwash", weight: 0.09 },
+    { id: "B-GLW", name: "Glowmatic", weight: 0.06 },
+    { id: "B-PUR", name: "Pure Drop", weight: 0.04 },
+  ];
+  // [code, brand, name, unit price, pack size, relative popularity in brand]
+  var SKUS = [
+    ["NFT-PL400", "B-NFT", "Northfield Premium Leaf Tea 400g", 260, 24, 5],
+    ["NFT-PL200", "B-NFT", "Northfield Premium Leaf Tea 200g", 140, 24, 3],
+    ["NFT-TB50", "B-NFT", "Northfield Tea Bags 50s", 180, 24, 3],
+    ["NFT-GT25", "B-NFT", "Northfield Green Tea Bags 25s", 210, 24, 1.5],
+    ["QBW-MS4", "B-QBW", "QuickBowl Masala Noodles 4-pack", 120, 24, 5],
+    ["QBW-CH4", "B-QBW", "QuickBowl Chicken Noodles 4-pack", 130, 24, 3],
+    ["QBW-CUP", "B-QBW", "QuickBowl Cup Noodles 60g", 50, 24, 2],
+    ["GLO-SB1", "B-GLO", "Goldleaf Soybean Oil 1L", 195, 12, 4],
+    ["GLO-SB5", "B-GLO", "Goldleaf Soybean Oil 5L", 940, 4, 2],
+    ["GLO-MU500", "B-GLO", "Goldleaf Mustard Oil 500ml", 160, 12, 1.5],
+    ["CRN-SL50", "B-CRN", "Crunchos Salted Chips 50g", 30, 48, 4],
+    ["CRN-CH50", "B-CRN", "Crunchos Chilli Chips 50g", 30, 48, 3],
+    ["CRN-FM120", "B-CRN", "Crunchos Family Pack 120g", 70, 24, 1.5],
+    ["SUN-MG1L", "B-SUN", "Sunny Valley Mango Drink 1L", 150, 12, 3],
+    ["SUN-OR250", "B-SUN", "Sunny Valley Orange Drink 250ml", 35, 24, 3],
+    ["SUN-LC250", "B-SUN", "Sunny Valley Litchi Drink 250ml", 35, 24, 2],
+    ["BRW-PW1K", "B-BRW", "Brightwash Detergent Powder 1kg", 190, 12, 4],
+    ["BRW-PW500", "B-BRW", "Brightwash Detergent Powder 500g", 100, 24, 3],
+    ["BRW-LQ1L", "B-BRW", "Brightwash Liquid Detergent 1L", 280, 12, 1],
+    ["GLW-BR300", "B-GLW", "Glowmatic Dishwash Bar 300g", 45, 48, 3],
+    ["GLW-LQ500", "B-GLW", "Glowmatic Dishwash Liquid 500ml", 120, 24, 2],
+    ["PUR-W500", "B-PUR", "Pure Drop Drinking Water 500ml", 20, 24, 3],
+    ["PUR-W15", "B-PUR", "Pure Drop Drinking Water 1.5L", 35, 12, 2],
+  ].map(function (row) {
+    return { id: row[0], brand: row[1], name: row[2], price: row[3], pack: row[4], pop: row[5] };
+  });
+
+  var SHOP_FIRST = ["Rahman", "Karim", "Shapla", "Nabil", "Green", "Fresh", "City", "Modern", "Amin", "Royal", "Sonali",
+    "Rupali", "Daily", "Family", "Star", "Hasan", "Padma", "Jamuna", "Sunrise", "Lucky", "Popular",
+    "Choice", "Prime", "Mina", "Ananda", "Nirala", "Shanti", "Kazi", "Dhanshiri", "Kopotakkho", "Bokul"];
+  var SHOP_LAST = ["Store", "General Store", "Super Shop", "Mart", "Grocery", "Mudi Dokan", "Bazar",
+    "Departmental Store", "Food Corner", "Variety Store", "Mini Mart", "Shop"];
+
+  /* ── geometry helpers (keep each shop inside its division polygon) ─────── */
+  function pointInRing(lon, lat, ring) {
+    var inside = false;
+    for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+      if ((yi > lat) !== (yj > lat) && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  function pointInFeature(lon, lat, feature) {
+    var polys = feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+    for (var p = 0; p < polys.length; p++) {
+      if (pointInRing(lon, lat, polys[p][0])) {
+        var inHole = false;
+        for (var h = 1; h < polys[p].length; h++) if (pointInRing(lon, lat, polys[p][h])) inHole = true;
+        if (!inHole) return true;
+      }
+    }
+    return false;
+  }
+  // Natural Earth spellings for the divisions the business files shops under.
+  var GEO_NAME = { Chattogram: "Chittagong", Barishal: "Barisal" };
+
+  /* ── generator ─────────────────────────────────────────────────────────── */
+  function generate(options) {
+    options = options || {};
+    var seed = options.seed || 20260924;
+    var geo = options.geo || null;
+    var R = makeRandom(seed);
+
+    var territories = TERRITORIES.map(function (t) { return Object.assign({}, t); });
+    var territoryById = {};
+    territories.forEach(function (t) { territoryById[t.id] = t; });
+
+    var distributors = DISTRIBUTORS.map(function (row) {
+      var t = territoryById[row[2]];
+      return { id: row[0], name: row[1] + " (" + t.name + ")", territory: t.id, division: t.division, supervisor: SUPERVISOR_OF[row[0]] };
+    });
+    var supervisors = SUPERVISORS.map(function (row) { return { id: row[0], name: row[1] }; });
+
+    // One SR per distributor, two for the busiest six (by territory weight).
+    var srs = [];
+    var byWeight = distributors.slice().sort(function (a, b) {
+      return territoryById[b.territory].weight - territoryById[a.territory].weight;
+    });
+    var nameIndex = 0;
+    byWeight.forEach(function (d, i) {
+      var count = i < 6 ? 2 : 1;
+      for (var k = 0; k < count; k++) {
+        srs.push({ id: "SR-" + pad(srs.length + 1), name: SR_NAMES[nameIndex++], distributor: d.id, supervisor: d.supervisor });
+      }
+    });
+    srs.sort(function (a, b) { return a.id < b.id ? -1 : 1; });
+
+    // ── shops ──
+    var featureByName = {};
+    if (geo) geo.features.forEach(function (f) { featureByName[f.properties.name] = f; });
+    var shops = [];
+    var usedNames = {};
+    var totalShops = options.shops || 980;
+    var territoryWeights = territories.map(function (t) { return t.weight; });
+    var weightSum = territoryWeights.reduce(function (a, b) { return a + b; }, 0);
+    territories.forEach(function (t) {
+      var n = Math.round((totalShops * t.weight) / weightSum);
+      var dist = distributors.filter(function (d) { return d.territory === t.id; })[0];
+      var distSrs = srs.filter(function (s) { return s.distributor === dist.id; });
+      var feature = featureByName[GEO_NAME[t.division] || t.division];
+      for (var i = 0; i < n; i++) {
+        var lat, lon, tries = 0;
+        do {
+          lat = t.lat + R.normal() * t.spread;
+          lon = t.lon + R.normal() * t.spread * 1.1;
+          tries++;
+        } while (feature && !pointInFeature(lon, lat, feature) && tries < 40);
+        if (feature && tries >= 40) { lat = t.lat; lon = t.lon; }
+
+        // Repeated names get a branch number, the way chains file them.
+        var base = R.pick(SHOP_FIRST) + " " + R.pick(SHOP_LAST);
+        var seen = (usedNames[base] || 0) + 1;
+        usedNames[base] = seen;
+        var name = seen === 1 ? base : base + " - " + seen;
+
+        // 72% of shops predate the year; the rest open through it.
+        var opened = R.chance(0.72) ? "2025-" + pad(R.int(1, 12)) + "-" + pad(R.int(1, 28))
+          : MONTHS[Math.min(MONTHS.length - 1, Math.floor(Math.pow(R.next(), 0.8) * MONTHS.length))] + "-" + pad(R.int(1, 24));
+        if (opened > AS_OF) opened = addDays(AS_OF, -R.int(1, 20));
+
+        shops.push({
+          id: "R-" + String(shops.length + 1).padStart(4, "0"),
+          name: name,
+          distributor: dist.id,
+          sr: distSrs[i % distSrs.length].id,
+          division: t.division,
+          territory: t.id,
+          lat: Math.round(lat * 10000) / 10000,
+          lon: Math.round(lon * 10000) / 10000,
+          opened: opened,
+          // Hidden behaviour, never exported: how often and how much a shop buys.
+          _rate: Math.min(0.32, R.lognormal(Math.log(0.05), 0.75)),
+          _size: R.lognormal(0, 0.7),
+          _brandBias: R.pick(BRANDS).id,
+          _dormant: R.chance(0.1),
+        });
+      }
+    });
+
+    // ── orders, lines and deliveries ──
+    var orders = [];
+    var lines = [];
+    var hourWeights = [0.01, 0.03, 0.06, 0.09, 0.105, 0.115, 0.13, 0.11, 0.095, 0.075, 0.06, 0.04, 0.025, 0.015];
+    var hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+    var hourIndex = hours.map(function (h, i) { return i; });
+    var skusByBrand = {};
+    SKUS.forEach(function (s) { (skusByBrand[s.brand] = skusByBrand[s.brand] || []).push(s); });
+    var distributorMood = {};
+    distributors.forEach(function (d) { distributorMood[d.id] = R.lognormal(0, 0.18); });
+
+    var targetsPotential = {}; // month|sr -> full-month ordered value, for target setting
+
+    MONTHS.forEach(function (month, mIndex) {
+      var days = daysInMonth(month);
+      // One shared monthly shock per distributor: some months a distributor is
+      // simply better run than others.
+      var monthMood = {};
+      distributors.forEach(function (d) { monthMood[d.id] = distributorMood[d.id] * R.lognormal(0, 0.14); });
+      for (var dayNum = 1; dayNum <= days; dayNum++) {
+        var day = month + "-" + pad(dayNum);
+        if (!isWorkingDay(day)) continue;
+        var future = day > AS_OF;
+        shops.forEach(function (shop) {
+          if (shop.opened > day) return;
+          if (shop._dormant && R.chance(0.85)) return;
+          var p = shop._rate * SEASON[mIndex] * monthMood[shop.distributor];
+          if (!R.chance(Math.min(0.9, p))) return;
+
+          var hour = hours[R.weighted(hourIndex, function (i) { return hourWeights[i]; })];
+          // The snapshot is taken at 17:40 on AS_OF: nothing later that day exists yet.
+          if (day === AS_OF && hour > AS_OF_HOUR) return;
+          var lineCount = R.weighted([1, 2, 3, 4], function (n) { return [0.45, 0.32, 0.16, 0.07][n - 1]; });
+          var picked = {};
+          var orderLines = [];
+          for (var k = 0; k < lineCount; k++) {
+            var brand = R.chance(0.35) ? shop._brandBias : R.weighted(BRANDS, function (b) { return b.weight; }).id;
+            var sku = R.weighted(skusByBrand[brand], function (s) { return s.pop; });
+            if (picked[sku.id]) continue;
+            picked[sku.id] = true;
+            var packs = Math.max(1, Math.round(R.lognormal(0, 0.6) * shop._size * (sku.price > 300 ? 0.3 : 0.6)));
+            orderLines.push({ sku: sku.id, brand: sku.brand, qty: packs * sku.pack, rate: sku.price });
+          }
+          var value = orderLines.reduce(function (a, l) { return a + l.qty * l.rate; }, 0);
+          var key = month + "|" + shop.sr;
+          targetsPotential[key] = (targetsPotential[key] || 0) + value;
+          if (future) return;
+
+          // Delivery: most orders land the same or next day; a few part-ship or stall.
+          var age = Math.round((parse(AS_OF) - parse(day)) / 86400000);
+          var lag = R.weighted([0, 1, 2, 3], function (n) { return [0.58, 0.3, 0.08, 0.04][n]; });
+          var status;
+          var roll = R.next();
+          if (age < lag || (age === lag && AS_OF_HOUR < 17 && R.chance(0.5))) status = "none";
+          else if (roll < 0.035 + (mIndex === 8 ? 0.02 : 0)) status = "none";
+          else if (roll < 0.075) status = "part";
+          else status = "full";
+
+          var deliveryDate = status === "none" ? null : addDays(day, lag);
+          var deliveryHour = status === "none" ? null : Math.max(9, Math.min(21, Math.round(16.6 + R.normal() * 1.6)));
+          if (deliveryDate === AS_OF && deliveryHour > AS_OF_HOUR) { deliveryHour = Math.max(hour, AS_OF_HOUR - R.int(0, 3)); }
+          var id = "SO-26-" + String(orders.length + 1).padStart(5, "0");
+          orders.push({
+            id: id, date: day, hour: hour, shop: shop.id, sr: shop.sr, distributor: shop.distributor,
+            division: shop.division, territory: shop.territory,
+            deliveryDate: deliveryDate, deliveryHour: deliveryHour,
+          });
+          orderLines.forEach(function (l, li) {
+            var delivered = status === "full" ? l.qty
+              : status === "part" ? (li === 0 ? Math.floor(l.qty * R.between(0.2, 0.8) / 6) * 6 : (R.chance(0.5) ? l.qty : 0))
+              : 0;
+            lines.push({ order: id, sku: l.sku, brand: l.brand, qty: l.qty, rate: l.rate, delivered: delivered });
+          });
+        });
+      }
+    });
+
+    // ── targets: per SR per month, set against the month's potential ──
+    // Rounded to 5,000 the way a sales plan is, and set a little above what the
+    // territory can do so that achievement spreads across both sides of 100%.
+    var targets = [];
+    MONTHS.forEach(function (month) {
+      srs.forEach(function (sr) {
+        var potential = targetsPotential[month + "|" + sr.id] || 0;
+        var stretch = R.between(0.8, 1.16);
+        var target = Math.max(50000, Math.round((potential * stretch) / 5000) * 5000);
+        targets.push({ month: month, sr: sr.id, distributor: sr.distributor, target: target });
+      });
+    });
+
+    // ── primary sales: company → distributor, by brand, per month ──
+    // A distributor buys ahead of or behind its own sell-out, so primary drifts
+    // around secondary rather than tracking it.
+    var orderedByMonthDistBrand = {};
+    var orderMonth = {};
+    orders.forEach(function (o) { orderMonth[o.id] = o; });
+    lines.forEach(function (l) {
+      var o = orderMonth[l.order];
+      var k = o.date.slice(0, 7) + "|" + o.distributor + "|" + l.brand;
+      orderedByMonthDistBrand[k] = (orderedByMonthDistBrand[k] || 0) + l.qty * l.rate;
+    });
+    var primary = [];
+    MONTHS.forEach(function (month, mIndex) {
+      distributors.forEach(function (d) {
+        var buying = R.lognormal(0.02, 0.24);
+        BRANDS.forEach(function (b) {
+          var sellOut = orderedByMonthDistBrand[month + "|" + d.id + "|" + b.id] || 0;
+          if (sellOut === 0 && R.chance(0.7)) return;
+          var amount = Math.round((sellOut * buying * R.lognormal(0, 0.12) + (R.chance(0.1) ? R.between(5000, 40000) : 0)) / 10) * 10;
+          if (amount > 0) primary.push({ month: month, distributor: d.id, brand: b.id, amount: amount });
+        });
+      });
+    });
+    // Primary orders the company has accepted but not yet invoiced (current month only).
+    var primaryPending = [];
+    distributors.forEach(function (d) {
+      if (R.chance(0.45)) primaryPending.push({ distributor: d.id, amount: Math.round(R.between(8000, 90000) / 100) * 100 });
+    });
+
+    // ── stock snapshot: distributor × SKU, as of AS_OF ──
+    var demand30 = {};
+    var windowStart = addDays(AS_OF, -30);
+    lines.forEach(function (l) {
+      var o = orderMonth[l.order];
+      if (o.date <= windowStart || o.date >= AS_OF) return;
+      var k = o.distributor + "|" + l.sku;
+      demand30[k] = (demand30[k] || 0) + l.qty;
+    });
+    var stock = [];
+    distributors.forEach(function (d) {
+      SKUS.forEach(function (s) {
+        var rate = (demand30[d.id + "|" + s.id] || 0) / 30;
+        var cover = R.weighted([0, 1, 2, 3], function (n) { return [0.14, 0.22, 0.42, 0.22][n]; });
+        var days = cover === 0 ? 0 : cover === 1 ? R.between(0.5, 7) : cover === 2 ? R.between(7, 30) : R.between(30, 80);
+        var onHand = Math.round((rate * days) / s.pack) * s.pack;
+        if (rate === 0 && R.chance(0.75)) onHand = 0;
+        if (rate === 0 && onHand === 0) {
+          if (!R.chance(0.2)) return;
+          onHand = s.pack * R.int(1, 6);
+        }
+        var reserved = onHand > 0 && R.chance(0.45) ? Math.min(onHand, s.pack * R.int(1, 8)) : 0;
+        stock.push({ distributor: d.id, sku: s.id, onHand: onHand, reserved: reserved });
+      });
+    });
+
+    // Strip the hidden behaviour fields before handing the data out.
+    shops = shops.map(function (s) {
+      return { id: s.id, name: s.name, distributor: s.distributor, sr: s.sr, division: s.division, territory: s.territory, lat: s.lat, lon: s.lon, opened: s.opened };
+    });
+
+    return {
+      meta: {
+        seed: seed,
+        asOf: AS_OF,
+        asOfHour: AS_OF_HOUR,
+        note: "Synthetic data generated for a portfolio demo. No real business records.",
+      },
+      months: MONTHS.slice(),
+      territories: territories.map(function (t) { return { id: t.id, name: t.name, division: t.division }; }),
+      distributors: distributors,
+      supervisors: supervisors,
+      srs: srs,
+      brands: BRANDS.map(function (b) { return { id: b.id, name: b.name }; }),
+      skus: SKUS.map(function (s) { return { id: s.id, brand: s.brand, name: s.name, price: s.price, pack: s.pack }; }),
+      shops: shops,
+      orders: orders,
+      lines: lines,
+      targets: targets,
+      primary: primary,
+      primaryPending: primaryPending,
+      stock: stock,
+    };
+  }
+
+  return {
+    generate: generate,
+    calendar: { AS_OF: AS_OF, MONTHS: MONTHS, isWorkingDay: isWorkingDay, daysInMonth: daysInMonth, addDays: addDays, parse: parse },
+  };
+});
+
+</script>
+<script>
+/* ─────────────────────────────────────────────────────────────────────────────
+   GT Sales Dashboard: portfolio demo
+
+   A browser-only replica of a production Next.js + PostgreSQL dashboard. The
+   production version computes these figures in SQL (reporting marts and
+   set-returning functions) and streams each card from the server. Here the
+   same definitions are recomputed client-side over a synthetic dataset, so the
+   demo needs no server, no database and no credentials.
+   ───────────────────────────────────────────────────────────────────────────── */
+(function () {
+  "use strict";
+
+  const DATA = window.SyntheticData.generate({ geo: window.BD_DIVISIONS });
+  const CAL = window.SyntheticData.calendar;
+  const AS_OF = DATA.meta.asOf;
+  const AS_OF_MONTH = AS_OF.slice(0, 7);
+
+  /* ── indexes ─────────────────────────────────────────────────────────── */
+  const index = (list) => Object.fromEntries(list.map((item) => [item.id, item]));
+  const SHOP = index(DATA.shops);
+  const DIST = index(DATA.distributors);
+  const SR = index(DATA.srs);
+  const SUP = index(DATA.supervisors);
+  const BRAND = index(DATA.brands);
+  const SKU = index(DATA.skus);
+  const TERR = index(DATA.territories);
+  const LINES = {};
+  DATA.lines.forEach((line) => (LINES[line.order] = LINES[line.order] || []).push(line));
+  DATA.orders.forEach((order) => {
+    order.month = order.date.slice(0, 7);
+    order.supervisor = SR[order.sr].supervisor;
+    order.lines = LINES[order.id] || [];
+  });
+  const DIVISIONS = ["Dhaka", "Chattogram", "Rajshahi", "Khulna", "Sylhet", "Rangpur", "Barishal"];
+
+  /* ── state ───────────────────────────────────────────────────────────── */
+  const FILTER_KEYS = ["supervisor", "sr", "distributor", "division", "territory", "brand"];
+  const FILTER_LABELS = { supervisor: "Supervisor", sr: "SR", distributor: "Distributor", division: "Division", territory: "Territory", brand: "Brand" };
+  const FILTER_ALL = { supervisor: "All supervisors", sr: "All SRs", distributor: "All distributors", division: "All divisions", territory: "All territories", brand: "All brands" };
+  const state = {
+    period: AS_OF_MONTH,
+    filters: { supervisor: "", sr: "", distributor: "", division: "", territory: "", brand: "" },
+    filtersOpen: false,
+    boardGroup: "distributor",
+    brandMode: "secondary",
+    block: null,
+    orderStatus: "all",
+    orderDate: "",
+    timingDay: "typical",
+    coverTarget: 7,
+    coverWindow: 30,
+    mapMode: "activity",
+    mapView: "country",
+    selectedShop: null,
+    sorts: {},
+  };
+
+  /* ── formatting ──────────────────────────────────────────────────────── */
+  const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const count = (value) => (value === null || value === undefined || !Number.isFinite(+value) ? "—" : Math.round(+value).toLocaleString("en-US"));
+  const pct = (ratio, digits = 1) => (ratio === null || ratio === undefined || !Number.isFinite(ratio) ? "—" : `${(ratio * 100).toFixed(digits)}%`);
+  // One unit per group of related figures: abbreviate to K only when the
+  // group's anchor (usually the target) reaches a million, so 798,936 never
+  // sits beside 16,750K and reads as the larger.
+  const moneyScale = (anchor) => (value) => {
+    if (value === null || value === undefined || !Number.isFinite(+value)) return "—";
+    const sign = value < 0 ? "-" : "";
+    const abs = Math.abs(value);
+    return Math.abs(anchor) >= 1e6 ? `${sign}${Math.round(abs / 1000).toLocaleString("en-US")}K` : `${sign}${Math.round(abs).toLocaleString("en-US")}`;
+  };
+  const money = (value) => moneyScale(value)(value);
+  const tenth = (value) => (!Number.isFinite(value) ? "—" : value >= 100 || Number.isInteger(value) ? count(value) : (Math.round(value * 10) / 10).toFixed(1));
+  const monthLabel = (month) => `${MONTH_NAMES[+month.slice(5, 7) - 1]} ${month.slice(0, 4)}`;
+  const dayLabel = (day) => { const d = CAL.parse(day); return `${DAY_NAMES[d.getUTCDay()]}, ${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}`; };
+  const hourLabel = (h) => (h === 0 ? "12 AM" : h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`);
+  const daysBetween = (a, b) => Math.round((CAL.parse(b) - CAL.parse(a)) / 86400000);
+  const pad = (n) => String(n).padStart(2, "0");
+
+  /* ── calendar ────────────────────────────────────────────────────────── */
+  function workingDays(month) {
+    const out = [];
+    for (let d = 1; d <= CAL.daysInMonth(month); d++) {
+      const day = `${month}-${pad(d)}`;
+      if (CAL.isWorkingDay(day)) out.push(day);
+    }
+    return out;
+  }
+  function progress(month) {
+    const wd = workingDays(month);
+    if (month < AS_OF_MONTH) return { wd, elapsed: wd.length, left: 0, frac: 1, closed: true };
+    const elapsed = wd.filter((d) => d <= AS_OF).length;
+    return { wd, elapsed, left: wd.length - elapsed, frac: elapsed / wd.length, closed: false };
+  }
+  function blocks(month) {
+    const n = CAL.daysInMonth(month);
+    return [[1, 10], [11, 20], [21, n]].map(([a, b], i) => ({ n: i + 1, from: `${month}-${pad(a)}`, to: `${month}-${pad(b)}`, label: `${a}–${b}` }));
+  }
+
+  /* ── scoping ─────────────────────────────────────────────────────────── */
+  function distributorInScope(id, f = state.filters) {
+    const d = DIST[id];
+    if (f.distributor && f.distributor !== id) return false;
+    if (f.division && d.division !== f.division) return false;
+    if (f.territory && d.territory !== f.territory) return false;
+    if (f.supervisor && d.supervisor !== f.supervisor) return false;
+    if (f.sr && SR[f.sr].distributor !== id) return false;
+    return true;
+  }
+  function srInScope(id, f = state.filters) {
+    const s = SR[id];
+    if (f.sr && f.sr !== id) return false;
+    if (f.supervisor && s.supervisor !== f.supervisor) return false;
+    return distributorInScope(s.distributor, { ...f, sr: "", supervisor: "" });
+  }
+  function shopInScope(shop) {
+    return srInScope(shop.sr);
+  }
+
+  // Every order in scope, with its lines cut to the brand filter and totalled.
+  function buildView() {
+    const brand = state.filters.brand;
+    const all = [];
+    for (const o of DATA.orders) {
+      if (!srInScope(o.sr)) continue;
+      const lines = brand ? o.lines.filter((l) => l.brand === brand) : o.lines;
+      if (!lines.length) continue;
+      let qty = 0, ordered = 0, delivered = 0, dq = 0;
+      for (const l of lines) { qty += l.qty; ordered += l.qty * l.rate; delivered += l.delivered * l.rate; dq += l.delivered; }
+      all.push({ o, lines, qty, ordered, delivered, dq, status: dq === 0 ? "Not delivered" : dq < qty ? "Partly delivered" : "Fully delivered" });
+    }
+    const byMonth = {};
+    all.forEach((row) => (byMonth[row.o.month] = byMonth[row.o.month] || []).push(row));
+    return { all, byMonth, period: byMonth[state.period] || [] };
+  }
+
+  // Targets are set per SR per month and are not split by brand, so a brand
+  // view has no target to measure against rather than an invented share of one.
+  function targetsFor(month) {
+    if (state.filters.brand) return null;
+    return DATA.targets.filter((t) => t.month === month && srInScope(t.sr));
+  }
+  // Primary sales are booked per distributor; an SR has none of their own.
+  function primaryFor(month) {
+    if (state.filters.sr) return null;
+    return DATA.primary.filter((p) => p.month === month && distributorInScope(p.distributor) && (!state.filters.brand || p.brand === state.filters.brand));
+  }
+  const sum = (list, fn) => list.reduce((acc, item) => acc + fn(item), 0);
+
+  function paceOf(ratio, frac) {
+    if (ratio === null || !Number.isFinite(ratio)) return { label: "No target", tone: "neutral", rank: 0 };
+    if (ratio >= 1) return { label: "Achieved", tone: "ok", rank: 4 };
+    if (frac >= 1) return { label: "Behind", tone: "behind", rank: 1 };
+    const projected = ratio / frac;
+    if (projected >= 1) return { label: "On pace", tone: "ok", rank: 3 };
+    if (projected >= 0.9) return { label: "Watch", tone: "watch", rank: 2 };
+    return { label: "Behind", tone: "behind", rank: 1 };
+  }
+
+  /* ── sortable tables ─────────────────────────────────────────────────── */
+  // A column is declared once (how it sorts and how it renders) so a header,
+  // its arrow and its cells cannot drift apart.
+  function sortRows(id, rows, columns, fallback) {
+    const s = state.sorts[id] || fallback;
+    const col = columns.find((c) => c.key === s.key) || columns[0];
+    const dir = s.dir === "asc" ? 1 : -1;
+    return rows.slice().sort((a, b) => {
+      const x = col.sort(a), y = col.sort(b);
+      if (x === y) return 0;
+      if (x === null || x === undefined) return 1;
+      if (y === null || y === undefined) return -1;
+      return (typeof x === "string" ? x.localeCompare(y) : x - y) * dir;
+    });
+  }
+  function table(id, columns, rows, fallback, { rank = false, empty = "Nothing in scope.", tall = false } = {}) {
+    const s = state.sorts[id] || fallback;
+    const sorted = sortRows(id, rows, columns, fallback);
+    const head = columns.map((c) => {
+      const active = s.key === c.key;
+      const aria = active ? ` aria-sort="${s.dir === "asc" ? "ascending" : "descending"}"` : "";
+      const arrow = c.sort ? `<span class="arr">${active ? (s.dir === "asc" ? "▲" : "▼") : "↕"}</span>` : "";
+      const label = c.sort ? `<button type="button" data-sort="${id}" data-key="${c.key}">${esc(c.label)}${arrow}</button>` : esc(c.label);
+      return `<th class="${c.text ? "l" : ""}"${aria} scope="col">${label}</th>`;
+    }).join("");
+    const body = sorted.length
+      ? sorted.map((row, i) => `<tr>${rank ? `<td class="rank">${i + 1}</td>` : ""}${columns.map((c) => `<td class="${c.cls || (c.text ? "l" : "")}">${c.cell(row)}</td>`).join("")}</tr>`).join("")
+      : `<tr><td class="l t-meta" colspan="${columns.length + (rank ? 1 : 0)}">${esc(empty)}</td></tr>`;
+    return `<div class="tbl-wrap${tall ? " tall" : ""}"><table><thead><tr>${rank ? '<th class="l" scope="col">#</th>' : ""}${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  }
+  const inbar = (ratio, color, label = pct(ratio)) =>
+    `<span class="inbar"><span class="bt"><i style="width:${Math.max(0, Math.min(1, ratio || 0)) * 100}%;background:var(${color})"></i></span><span>${label}</span></span>`;
+  const pill = (p) => `<span class="pill ${p.tone} ${p.tone}">${esc(p.label)}</span>`;
+  const seg = (name, options, current, label) =>
+    `<div class="seg" role="group" aria-label="${esc(label)}">${options.map(([value, text, extra]) =>
+      `<button type="button" data-seg="${name}" data-value="${value}" aria-pressed="${String(value) === String(current)}">${esc(text)}${extra ? `<small>${esc(extra)}</small>` : ""}</button>`).join("")}</div>`;
+
+  /* ── charts (hand-rolled SVG, painted from theme tokens) ─────────────── */
+  function niceStep(raw) {
+    const p = Math.pow(10, Math.floor(Math.log10(raw || 1)));
+    const m = raw / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
+  }
+  function lineChart({ labels, series, yFormat, tipFor, shade = [], peaks = [], height = 300, width = 1000 }) {
+    const m = { l: 60, r: 18, t: 24, b: 30 };
+    const w = width - m.l - m.r, h = height - m.t - m.b;
+    const max = Math.max(1, ...series.flatMap((s) => s.values.filter(Number.isFinite)));
+    const step = niceStep(max / 4);
+    const top = Math.ceil(max / step) * step;
+    const n = labels.length;
+    const x = (i) => m.l + (n === 1 ? w / 2 : (i * w) / (n - 1));
+    const y = (v) => m.t + h - (v / top) * h;
+    let svg = `<div class="chart-box"><svg class="chart" viewBox="0 0 ${width} ${height}" role="img">`;
+    shade.forEach(([a, b]) => {
+      const x0 = x(a), x1 = x(b);
+      svg += `<rect x="${x0}" y="${m.t}" width="${Math.max(0, x1 - x0)}" height="${h}" fill="var(--surface-2)"/>`;
+    });
+    for (let v = 0; v <= top + 1e-9; v += step) {
+      svg += `<line class="grid" x1="${m.l}" x2="${m.l + w}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 10}" y="${y(v) + 4}" text-anchor="end">${esc(yFormat(v))}</text>`;
+    }
+    const every = Math.ceil(n / 12);
+    labels.forEach((label, i) => { if (i % every === 0 || i === n - 1) svg += `<text x="${x(i)}" y="${height - 8}" text-anchor="middle">${esc(label)}</text>`; });
+    series.forEach((s) => {
+      const pts = s.values.map((v, i) => (Number.isFinite(v) ? [x(i), y(v)] : null)).filter(Boolean);
+      if (!pts.length) return;
+      const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
+      if (s.area) svg += `<path d="${d}L${pts[pts.length - 1][0]},${m.t + h}L${pts[0][0]},${m.t + h}Z" fill="var(${s.color})" opacity=".09"/>`;
+      svg += `<path d="${d}" fill="none" stroke="var(${s.color})" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+      if (s.dots) pts.forEach((p) => (svg += `<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="var(${s.color})" stroke="var(--surface)" stroke-width="1.5"/>`));
+    });
+    peaks.forEach(({ series: si, i, label }) => {
+      const v = series[si].values[i];
+      svg += `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="var(${series[si].color})" stroke="var(--surface)" stroke-width="2"/><text class="lbl-strong" x="${x(i)}" y="${y(v) - 11}" text-anchor="middle">${esc(label)}</text>`;
+    });
+    const band = n === 1 ? w : w / (n - 1);
+    labels.forEach((_, i) => {
+      svg += `<rect x="${x(i) - band / 2}" y="${m.t}" width="${band}" height="${h}" fill="transparent" data-tip="${esc(tipFor(i))}"/>`;
+    });
+    return svg + "</svg></div>";
+  }
+
+  function barChart(rows, color, height = 300, width = 1000) {
+    const m = { l: 10, r: 10, t: 46, b: 46 };
+    const w = width - m.l - m.r, h = height - m.t - m.b;
+    const max = Math.max(1, ...rows.map((r) => r.value));
+    const band = w / Math.max(rows.length, 1);
+    const bw = Math.min(64, band * 0.56);
+    let svg = `<div class="chart-box"><svg class="chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Brand contribution">`;
+    svg += `<line class="grid" x1="${m.l}" x2="${m.l + w}" y1="${m.t + h}" y2="${m.t + h}"/>`;
+    rows.forEach((r, i) => {
+      const cx = m.l + band * i + band / 2;
+      const bh = Math.max(2, (r.value / max) * h);
+      svg += `<rect x="${cx - bw / 2}" y="${m.t + h - bh}" width="${bw}" height="${bh}" rx="4" fill="var(${color})" data-tip="${esc(`<b>${esc(r.label)}</b><br>${count(r.value)} · ${pct(r.share)} share${r.qty !== undefined ? `<br>${count(r.qty)} qty` : ""}`)}"/>`;
+      svg += `<text class="lbl-strong" x="${cx}" y="${m.t + h - bh - 20}" text-anchor="middle">${esc(money(r.value))}</text>`;
+      svg += `<text x="${cx}" y="${m.t + h - bh - 7}" text-anchor="middle">${pct(r.share)}</text>`;
+      svg += `<text x="${cx}" y="${m.t + h + 18}" text-anchor="middle" fill="var(--ink-2)">${esc(r.label)}</text>`;
+      if (r.qty !== undefined) svg += `<text x="${cx}" y="${m.t + h + 33}" text-anchor="middle">${count(r.qty)} qty</text>`;
+    });
+    return svg + "</svg></div>";
+  }
+
+  /* ── KPI hero + tiles ────────────────────────────────────────────────── */
+  function achievementBar(ratio, tone, frac) {
+    const fill = Math.max(0, Math.min(1, ratio || 0)) * 100;
+    const paceMark = frac < 1 ? `<span class="pace" style="left:${frac * 100}%" title="Where the month is"></span>` : "";
+    return `<div class="abar"><i style="width:${fill}%;background:var(--${tone === "neutral" ? "ink-3" : tone})"></i><span class="mark" style="left:80%"></span>${paceMark}</div>
+      <div class="abar-scale"><span style="left:80%">80%</span><span style="left:100%">100%</span></div>`;
+  }
+  function heroCard({ title, ratio, frac, amount, cap, facts }) {
+    const p = ratio === null ? { label: "No target", tone: "neutral" }
+      : ratio >= 1 ? { label: "Achieved", tone: "ok" }
+      : frac >= 1 ? (ratio >= 0.8 ? { label: "Past 80%", tone: "ok" } : { label: "Short", tone: "behind" })
+      : paceOf(ratio, frac);
+    return `<div class="card hero">
+      <div class="hero-top"><span class="t-lbl">${esc(title)}</span>
+        <span class="hero-pct ${p.tone}"><b>${pct(ratio)}</b><span class="cap">${esc(p.label)}</span></span></div>
+      <div><div class="hero-money"><span class="t-hero">${count(amount)}</span><span class="cap">${esc(cap)}</span></div>
+      ${achievementBar(ratio, p.tone, frac)}</div>
+      <dl class="facts">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
+    </div>`;
+  }
+
+  function renderPulse(view) {
+    const prog = progress(state.period);
+    const targets = targetsFor(state.period);
+    const target = targets ? sum(targets, (t) => t.target) : null;
+    const delivered = sum(view.period, (r) => r.delivered);
+    const ordered = sum(view.period, (r) => r.ordered);
+    const fmt = moneyScale(target || delivered);
+    const ratio = target ? delivered / target : null;
+    const ask = target === null ? "—" : prog.closed
+      ? `${fmt(target / prog.wd.length)}<small>/day</small>`
+      : prog.left ? `${fmt(Math.max(0, target - delivered) / prog.left)}<small>/day</small>` : "—";
+
+    const primaryRows = primaryFor(state.period);
+    const primary = primaryRows ? sum(primaryRows, (p) => p.amount) : null;
+    const pending = state.period === AS_OF_MONTH && !state.filters.brand && !state.filters.sr
+      ? sum(DATA.primaryPending.filter((p) => distributorInScope(p.distributor)), (p) => p.amount) : null;
+    const pTarget = primary === null ? null : target;
+    const pRatio = pTarget && primary !== null ? primary / pTarget : null;
+
+    document.getElementById("hero").innerHTML =
+      heroCard({
+        title: "Secondary achievement", ratio, frac: prog.frac, amount: delivered, cap: "delivered",
+        facts: [["Target", fmt(target)], ["Left to 80%", target ? fmt(Math.max(0, target * 0.8 - delivered)) : "—"],
+          [prog.closed ? "Daily ask · full month" : `Daily ask · ${prog.left} days left`, ask]],
+      }) +
+      heroCard({
+        title: "Primary achievement", ratio: pRatio, frac: prog.frac, amount: primary, cap: "net sales",
+        facts: [["Target", fmt(pTarget)], ["Left to 80%", pTarget && primary !== null ? fmt(Math.max(0, pTarget * 0.8 - primary)) : "—"],
+          ["With undelivered", pending !== null && pTarget ? pct((primary + pending) / pTarget) : "—"]],
+      });
+
+    // tiles
+    const open = view.period.filter((r) => r.dq === 0);
+    const scopeShops = DATA.shops.filter((s) => shopInScope(s) && s.opened <= `${state.period}-31`);
+    const active = new Set(view.period.filter((r) => r.delivered > 0).map((r) => r.o.shop));
+    const firstOrder = {};
+    view.all.forEach((r) => { if (!firstOrder[r.o.shop] || r.o.date < firstOrder[r.o.shop]) firstOrder[r.o.shop] = r.o.date; });
+    const months = DATA.months;
+    const prevMonth = months[months.indexOf(state.period) - 1];
+    const newDoors = Object.values(firstOrder).filter((d) => d.startsWith(state.period)).length;
+    const prevDoors = prevMonth ? Object.values(firstOrder).filter((d) => d.startsWith(prevMonth)).length : null;
+    const doorDelta = prevDoors ? (newDoors - prevDoors) / prevDoors : null;
+    const tiles = [
+      ["Secondary delivered", money(delivered), `${pct(ordered ? delivered / ordered : null)} of ordered value`],
+      ["Undelivered primary", pending === null ? "—" : count(pending), pending === null ? "Tracked for the current month" : `Primary would reach ${pct(pTarget ? (primary + pending) / pTarget : null)}`],
+      ["Open delivery value", count(sum(open, (r) => r.ordered)), `${count(open.length)} orders with nothing delivered`],
+      ["Active retail shops", count(active.size), `of ${count(scopeShops.length)} mapped · ${pct(scopeShops.length ? active.size / scopeShops.length : null)} purchasing`],
+      ["New doors opened", count(newDoors), prevDoors === null ? "First month on record" : `${count(prevDoors)} last month · <span class="${doorDelta >= 0 ? "up" : "down"}">${doorDelta >= 0 ? "▴" : "▾"} ${pct(Math.abs(doorDelta))}</span>`],
+    ];
+    document.getElementById("tiles").innerHTML = tiles.map(([k, v, sub]) =>
+      `<div class="card tile"><span class="t-lbl">${esc(k)}</span><span class="t-stat">${v}</span><span class="t-meta">${sub}</span></div>`).join("");
+  }
+
+  /* ── leaderboard ─────────────────────────────────────────────────────── */
+  function renderLeaderboard(view) {
+    const prog = progress(state.period);
+    const targets = targetsFor(state.period);
+    const primary = primaryFor(state.period) || [];
+    const deliveredBy = (keyFn) => { const out = {}; view.period.forEach((r) => (out[keyFn(r.o)] = (out[keyFn(r.o)] || 0) + r.delivered)); return out; };
+    const group = state.boardGroup;
+    let rows, columns;
+    if (group === "sr") {
+      const del = deliveredBy((o) => o.sr);
+      rows = DATA.srs.filter((s) => srInScope(s.id)).map((s) => {
+        const t = targets ? sum(targets.filter((x) => x.sr === s.id), (x) => x.target) : null;
+        const achieved = del[s.id] || 0;
+        const ratio = t ? achieved / t : null;
+        return { name: s.name, sub: DIST[s.distributor].name, target: t, achieved, ratio, left: t === null ? null : Math.max(0, t - achieved), pace: paceOf(ratio, prog.frac) };
+      });
+      const fmt = moneyScale(Math.max(...rows.map((r) => r.target || r.achieved), 0));
+      columns = [
+        { key: "name", label: "SR", text: true, cls: "l who", sort: (r) => r.name, cell: (r) => `${esc(r.name)}<span>${esc(r.sub)}</span>` },
+        { key: "target", label: "Target", sort: (r) => r.target, cell: (r) => fmt(r.target) },
+        { key: "achieved", label: "Delivered", sort: (r) => r.achieved, cell: (r) => fmt(r.achieved) },
+        { key: "ratio", label: "Secondary %", sort: (r) => r.ratio, cell: (r) => inbar(r.ratio, "--s1") },
+        { key: "left", label: "Target left", sort: (r) => r.left, cell: (r) => fmt(r.left) },
+        { key: "pace", label: "Pace", sort: (r) => r.pace.rank, cell: (r) => pill(r.pace) },
+      ];
+    } else {
+      const keyOf = group === "distributor" ? (o) => o.distributor : (o) => o.supervisor;
+      const del = deliveredBy(keyOf);
+      const members = group === "distributor"
+        ? DATA.distributors.filter((d) => distributorInScope(d.id)).map((d) => ({ id: d.id, name: d.name, dists: [d.id] }))
+        : DATA.supervisors.filter((s) => !state.filters.supervisor || s.id === state.filters.supervisor)
+          .map((s) => ({ id: s.id, name: s.name, dists: DATA.distributors.filter((d) => d.supervisor === s.id && distributorInScope(d.id)).map((d) => d.id) }))
+          .filter((s) => s.dists.length);
+      rows = members.map((mem) => {
+        const t = targets ? sum(targets.filter((x) => (group === "distributor" ? x.distributor === mem.id : SR[x.sr].supervisor === mem.id)), (x) => x.target) : null;
+        const pri = state.filters.sr ? null : sum(primary.filter((p) => mem.dists.includes(p.distributor)), (p) => p.amount);
+        const sec = del[mem.id] || 0;
+        const secRatio = t ? sec / t : null;
+        return {
+          name: mem.name, sub: group === "supervisor" ? `${mem.dists.length} distributor${mem.dists.length === 1 ? "" : "s"}` : TERR[DIST[mem.id].territory].name + " · " + DIST[mem.id].division,
+          target: t, priRatio: t && pri !== null ? pri / t : null, secRatio,
+          priLeft: t && pri !== null ? Math.max(0, t - pri) : null, secLeft: t ? Math.max(0, t - sec) : null, pace: paceOf(secRatio, prog.frac),
+        };
+      });
+      const fmt = moneyScale(Math.max(...rows.map((r) => r.target || 0), 0));
+      columns = [
+        { key: "name", label: group === "distributor" ? "Distributor" : "Supervisor", text: true, cls: "l who", sort: (r) => r.name, cell: (r) => `${esc(r.name)}<span>${esc(r.sub)}</span>` },
+        { key: "target", label: "Target", sort: (r) => r.target, cell: (r) => fmt(r.target) },
+        { key: "priRatio", label: "Primary %", sort: (r) => r.priRatio, cell: (r) => inbar(r.priRatio, "--s2") },
+        { key: "secRatio", label: "Secondary %", sort: (r) => r.secRatio, cell: (r) => inbar(r.secRatio, "--s1") },
+        { key: "priLeft", label: "Pri target left", sort: (r) => r.priLeft, cell: (r) => fmt(r.priLeft) },
+        { key: "secLeft", label: "Sec target left", sort: (r) => r.secLeft, cell: (r) => fmt(r.secLeft) },
+        { key: "pace", label: "Pace", sort: (r) => r.pace.rank, cell: (r) => pill(r.pace) },
+      ];
+    }
+    const fallback = { key: group === "sr" ? "ratio" : "secRatio", dir: "desc" };
+    document.getElementById("leaderboard").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Leaderboard</h3>
+        <span class="t-meta">Delivered secondary against target${prog.closed ? "" : `, paced against ${pct(prog.frac, 0)} of the month's working days gone`}${state.filters.brand ? ". Targets are set per SR, not per brand" : ""}</span></div>
+        ${seg("boardGroup", [["distributor", "Distributor"], ["supervisor", "Supervisor"], ["sr", "SR"]], group, "Group leaderboard by")}</div>
+      ${table(`board-${group}`, columns, rows, fallback, { rank: true })}`;
+  }
+
+  /* ── brand contribution ──────────────────────────────────────────────── */
+  function renderBrands(view) {
+    const mode = state.brandMode;
+    let rows;
+    if (mode === "secondary") {
+      const agg = {};
+      view.period.forEach((r) => r.lines.forEach((l) => {
+        const a = (agg[l.brand] = agg[l.brand] || { value: 0, qty: 0 });
+        a.value += l.delivered * l.rate; a.qty += l.delivered;
+      }));
+      rows = Object.entries(agg).map(([id, a]) => ({ label: BRAND[id].name, value: a.value, qty: a.qty }));
+    } else {
+      const agg = {};
+      (primaryFor(state.period) || []).forEach((p) => (agg[p.brand] = (agg[p.brand] || 0) + p.amount));
+      rows = Object.entries(agg).map(([id, value]) => ({ label: BRAND[id].name, value }));
+    }
+    rows = rows.filter((r) => r.value > 0).sort((a, b) => b.value - a.value);
+    const total = sum(rows, (r) => r.value);
+    rows.forEach((r) => (r.share = total ? r.value / total : 0));
+    document.getElementById("brands").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Brand contribution</h3>
+        <span class="t-meta">${mode === "secondary" ? "Delivered value on each column · quantity under the brand" : "Primary net sales to distributors, by brand"}</span></div>
+        ${seg("brandMode", [["primary", "Primary"], ["secondary", "Secondary"]], mode, "Show brand contribution for")}</div>
+      ${rows.length ? barChart(rows, mode === "secondary" ? "--s1" : "--s2") : `<p class="t-meta">${state.filters.sr && mode === "primary" ? "Primary sales are booked per distributor, so an SR view has none." : "No sales in scope."}</p>`}`;
+  }
+
+  /* ── 10-day block detail ─────────────────────────────────────────────── */
+  function renderBlocks(view) {
+    const prog = progress(state.period);
+    const bl = blocks(state.period);
+    const current = bl.find((b) => b.from <= AS_OF && AS_OF <= b.to);
+    const chosen = state.block || (current ? current.n : 1);
+    const targets = targetsFor(state.period);
+    const wdIn = (b) => prog.wd.filter((d) => d >= b.from && d <= b.to);
+    // Each block carries a third of the monthly target; the rounding remainder
+    // lands on block 3 so the three always add back to the month exactly.
+    const blockTarget = (monthly, b) => {
+      const third = Math.floor(monthly / 3);
+      return b.n < 3 ? third : monthly - 2 * third;
+    };
+    const achievedIn = (b, srId) => sum(view.period.filter((r) => r.o.date >= b.from && r.o.date <= b.to && (!srId || r.o.sr === srId)), (r) => r.delivered);
+    const segs = bl.map((b) => {
+      const t = targets ? sum(targets, (x) => blockTarget(x.target, b)) : null;
+      return [b.n, `Block ${b.n}`, t ? pct(achievedIn(b) / t, 0) : ""];
+    });
+    const b = bl[chosen - 1];
+    const daysLeft = b.from <= AS_OF && AS_OF <= b.to ? wdIn(b).filter((d) => d > AS_OF).length : 0;
+    const rows = (targets || []).map((t) => {
+      const target = blockTarget(t.target, b);
+      const achieved = achievedIn(b, t.sr);
+      const remaining = Math.max(0, target - achieved);
+      return { dist: DIST[t.distributor].name, sr: SR[t.sr].name, target, achieved, ratio: target ? achieved / target : null, remaining, ask: daysLeft ? remaining / daysLeft : null };
+    });
+    const fmt = moneyScale(Math.max(...rows.map((r) => r.target), 0));
+    const stateWord = b.to < AS_OF || state.period < AS_OF_MONTH ? "closed" : b.from > AS_OF ? "not started" : `${daysLeft} working day${daysLeft === 1 ? "" : "s"} left`;
+    const columns = [
+      { key: "dist", label: "Distributor", text: true, cls: "l who", sort: (r) => r.dist, cell: (r) => `${esc(r.dist)}<span>${esc(r.sr)}</span>` },
+      { key: "target", label: "Target", sort: (r) => r.target, cell: (r) => fmt(r.target) },
+      { key: "achieved", label: "Achieved", sort: (r) => r.achieved, cell: (r) => fmt(r.achieved) },
+      { key: "ratio", label: "Progress", sort: (r) => r.ratio, cell: (r) => inbar(r.ratio, r.ratio >= 1 ? "--ok" : "--s1", pct(r.ratio, 0)) },
+      { key: "remaining", label: "Remaining", sort: (r) => r.remaining, cell: (r) => fmt(r.remaining) },
+      { key: "ask", label: "Day ask", sort: (r) => r.ask, cell: (r) => (r.ask === null ? "—" : fmt(r.ask)) },
+    ];
+    document.getElementById("blocks").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Block detail</h3>
+        <span class="t-meta">The month runs in three 10-day blocks (${bl.map((x) => x.label).join(", ")}), each carrying a third of the monthly target. Block ${b.n}: ${stateWord}.</span></div>
+        ${seg("block", segs, chosen, "Select block")}</div>
+      ${targets ? table("blocks", columns, rows, { key: "achieved", dir: "desc" }) : '<p class="t-meta">Targets are set per SR, not per brand, so a brand view has no block target.</p>'}`;
+  }
+
+  /* ── primary vs secondary trend ──────────────────────────────────────── */
+  function renderTrend(view) {
+    const months = DATA.months.filter((m) => m <= state.period);
+    const sec = months.map((m) => sum(view.byMonth[m] || [], (r) => r.delivered));
+    const pri = months.map((m) => { const rows = primaryFor(m); return rows ? sum(rows, (p) => p.amount) : NaN; });
+    const fmt = moneyScale(Math.max(...sec, ...pri.filter(Number.isFinite)));
+    document.getElementById("trend").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Primary vs secondary by month</h3>
+        <span class="t-meta">Primary is what distributors buy from the company; secondary is what they deliver to shops. A gap that keeps widening means stock is building up (or running down) at the distributor.</span></div>
+        <div class="legend"><span><i style="background:var(--s2)"></i>Primary</span><span><i style="background:var(--s1)"></i>Secondary</span></div></div>
+      ${lineChart({
+        labels: months.map((m) => MONTH_NAMES[+m.slice(5) - 1]),
+        series: [{ values: sec, color: "--s1", area: true, dots: true }, { values: pri, color: "--s2", dots: true }],
+        yFormat: fmt,
+        tipFor: (i) => `<b>${monthLabel(months[i])}</b><br>Primary ${Number.isFinite(pri[i]) ? count(pri[i]) : "—"}<br>Secondary ${count(sec[i])}${Number.isFinite(pri[i]) && sec[i] ? `<br>Ratio ${(pri[i] / sec[i]).toFixed(2)}×` : ""}`,
+      })}`;
+  }
+
+  /* ── orders table + detail ───────────────────────────────────────────── */
+  function renderOrders(view) {
+    const dates = [...new Set(view.period.map((r) => r.o.date))].sort().reverse();
+    if (state.orderDate && !dates.includes(state.orderDate)) state.orderDate = "";
+    let rows = view.period;
+    if (state.orderDate) rows = rows.filter((r) => r.o.date === state.orderDate);
+    if (state.orderStatus === "partly") rows = rows.filter((r) => r.status === "Partly delivered");
+    if (state.orderStatus === "not") rows = rows.filter((r) => r.status === "Not delivered");
+    const tone = { "Fully delivered": "ok", "Partly delivered": "watch", "Not delivered": "behind" };
+    const columns = [
+      { key: "date", label: "Date", text: true, cls: "l sub nowrap", sort: (r) => r.o.date + pad(r.o.hour) + r.o.id, cell: (r) => `<b>${dayLabel(r.o.date)}</b><span>${esc(r.o.id)} · ${hourLabel(r.o.hour)}</span>` },
+      { key: "sr", label: "SR", text: true, sort: (r) => SR[r.o.sr].name, cell: (r) => esc(SR[r.o.sr].name) },
+      { key: "shop", label: "Retailer", text: true, cls: "l who", sort: (r) => SHOP[r.o.shop].name, cell: (r) => `${esc(SHOP[r.o.shop].name)}<span>${esc(DIST[r.o.distributor].name)}</span>` },
+      { key: "qty", label: "Order qty", sort: (r) => r.qty, cell: (r) => count(r.qty) },
+      { key: "ordered", label: "Order value", sort: (r) => r.ordered, cell: (r) => count(r.ordered) },
+      { key: "ddate", label: "Delivery date", sort: (r) => r.o.deliveryDate || "", cell: (r) => (r.o.deliveryDate ? dayLabel(r.o.deliveryDate) : "—") },
+      { key: "delivered", label: "Delivered value", sort: (r) => r.delivered, cell: (r) => (r.dq ? count(r.delivered) : "—") },
+      { key: "status", label: "Status", sort: (r) => r.dq / r.qty, cell: (r) => `<span class="pill ${tone[r.status]} ${tone[r.status]}">${r.status}</span>` },
+      { key: "view", label: "Detail", cell: (r) => `<button type="button" class="tbl-action" data-order="${r.o.id}">View</button>` },
+    ];
+    const shown = sortRows("orders", rows, columns, { key: "date", dir: "desc" }).slice(0, 400);
+    const counts = { all: view.period.length, partly: view.period.filter((r) => r.status === "Partly delivered").length, not: view.period.filter((r) => r.status === "Not delivered").length };
+    document.getElementById("orders").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Live order &amp; delivery update</h3>
+        <span class="t-meta">Every order the field force raised in ${monthLabel(state.period)}, matched to its delivery note. In production this table refreshes every five minutes from the ERP.</span></div>
+        <div class="controls">
+          ${seg("orderStatus", [["all", "All", count(counts.all)], ["partly", "Partly", count(counts.partly)], ["not", "Not delivered", count(counts.not)]], state.orderStatus, "Filter orders by delivery status")}
+          <label class="ctl"><span class="t-lbl">Order date</span><select id="order-date">
+            <option value="">All dates</option>${dates.map((d) => `<option value="${d}"${d === state.orderDate ? " selected" : ""}>${dayLabel(d)}</option>`).join("")}</select></label>
+        </div></div>
+      ${table("orders", columns, shown, { key: "date", dir: "desc" }, { tall: true })}
+      <div class="tbl-foot"><span>${count(rows.length)} matching orders${rows.length > 400 ? " · first 400 shown" : ""}</span>
+        <span>${count(sum(rows, (r) => r.qty))} qty · ${money(sum(rows, (r) => r.ordered))} ordered · ${money(sum(rows, (r) => r.delivered))} delivered</span></div>`;
+  }
+
+  function openOrder(id) {
+    const o = DATA.orders.find((x) => x.id === id);
+    if (!o) return;
+    const lines = o.lines.map((l) => `<tr><td class="l who">${esc(SKU[l.sku].name)}<span>${esc(BRAND[l.brand].name)}</span></td><td>${count(l.qty)}</td><td>${count(l.delivered)}</td><td>${count(l.rate)}</td><td>${count(l.qty * l.rate)}</td></tr>`).join("");
+    const ordered = sum(o.lines, (l) => l.qty * l.rate), delivered = sum(o.lines, (l) => l.delivered * l.rate);
+    const modal = document.getElementById("modal");
+    modal.innerHTML = `<div class="card modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="card-head"><div><h3 class="t-card" id="modal-title">${esc(o.id)}</h3>
+        <span class="t-meta">${esc(SHOP[o.shop].name)} · ${esc(DIST[o.distributor].name)}<br>Raised by ${esc(SR[o.sr].name)} on ${dayLabel(o.date)}, ${hourLabel(o.hour)} · ${o.deliveryDate ? `delivered ${dayLabel(o.deliveryDate)}, ${hourLabel(o.deliveryHour)}` : "no delivery note yet"}</span></div>
+        <button type="button" class="tbl-action" data-close>Close</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th class="l">SKU</th><th>Ordered</th><th>Delivered</th><th>Rate</th><th>Value</th></tr></thead><tbody>${lines}</tbody></table></div>
+      <div class="tbl-foot"><span>${o.lines.length} line${o.lines.length === 1 ? "" : "s"}</span><span>${count(ordered)} ordered · ${count(delivered)} delivered</span></div></div>`;
+    modal.hidden = false;
+    modal.querySelector("[data-close]").focus();
+  }
+
+  /* ── delivery completion + ageing ────────────────────────────────────── */
+  function renderDelivery(view) {
+    const statuses = [["Fully delivered", "ok", "nothing outstanding"], ["Partly delivered", "watch", null], ["Not delivered", "behind", null]];
+    const total = view.period.length;
+    const parts = statuses.map(([name, tone, note]) => {
+      const rows = view.period.filter((r) => r.status === name);
+      const open = sum(rows, (r) => r.ordered - r.delivered);
+      return { name, tone, n: rows.length, note: note || `${count(open)} still open` };
+    });
+    document.getElementById("completion").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Delivery completion</h3><span class="t-meta">Orders in ${monthLabel(state.period)} by how much of them has shipped</span></div></div>
+      <div class="status-list">${parts.map((p) => `<div class="status-row"><span><b>${p.name}</b> <span class="t-meta">· ${p.note}</span></span><span class="fig"><b>${count(p.n)}</b> <span class="t-meta">orders</span></span>
+        <span class="bt"><i style="width:${total ? (p.n / total) * 100 : 0}%;background:var(--${p.tone})"></i></span></div>`).join("")}</div>
+      <div class="stat"><span class="t-lbl">Share fully delivered</span><b>${pct(total ? parts[0].n / total : null)}</b></div>`;
+
+    // Ageing counts only orders with nothing delivered: a part-shipped order is
+    // moving, and ageing it would bury the ones that have stalled outright.
+    const buckets = [["0–2 days", 0, 2], ["3–7 days", 3, 7], ["8–14 days", 8, 14], ["15+ days", 15, 1e9]].map(([label, lo, hi]) => {
+      const rows = view.period.filter((r) => r.dq === 0 && daysBetween(r.o.date, AS_OF) >= lo && daysBetween(r.o.date, AS_OF) <= hi);
+      return { label, n: rows.length, value: sum(rows, (r) => r.ordered) };
+    });
+    const max = Math.max(1, ...buckets.map((b) => b.value));
+    document.getElementById("ageing").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Undelivered ageing</h3><span class="t-meta">Orders with nothing delivered, by age at ${dayLabel(AS_OF)}</span></div></div>
+      <div class="age-grid">${buckets.map((b) => `<div class="age"><span class="t-lbl">${b.label}</span>
+        <div class="col"><i style="height:${(b.value / max) * 100}%;opacity:${b.value ? 1 : 0.25}"></i></div>
+        <b class="fig">${count(b.value)}</b><span class="t-meta">${count(b.n)} order${b.n === 1 ? "" : "s"}</span></div>`).join("")}</div>`;
+  }
+
+  /* ── order & delivery timing ─────────────────────────────────────────── */
+  function renderTiming(view) {
+    const hours = [];
+    for (let h = 8; h <= 21; h++) hours.push(h);
+    const days = [...new Set(view.period.map((r) => r.o.date))].sort().reverse();
+    if (state.timingDay !== "typical" && !days.includes(state.timingDay)) state.timingDay = "typical";
+    const typical = state.timingDay === "typical";
+    const orderRows = typical ? view.period : view.period.filter((r) => r.o.date === state.timingDay);
+    const delRows = view.all.filter((r) => r.o.deliveryDate && (typical ? r.o.deliveryDate.startsWith(state.period) : r.o.deliveryDate === state.timingDay));
+    const orderDays = typical ? Math.max(1, days.length) : 1;
+    const delDays = typical ? Math.max(1, new Set(delRows.map((r) => r.o.deliveryDate)).size) : 1;
+    const orders = hours.map((h) => orderRows.filter((r) => r.o.hour === h).length / orderDays);
+    const dels = hours.map((h) => delRows.filter((r) => r.o.deliveryHour === h).length / delDays);
+    const peak = (arr) => arr.indexOf(Math.max(...arr));
+    const oPeak = peak(orders), dPeak = peak(dels);
+    let cum = 0, half = null;
+    const totalOrders = sum(orders, (v) => v);
+    orders.forEach((v, i) => { cum += v; if (half === null && cum >= totalOrders / 2) half = hours[i]; });
+    const outside = orderRows.filter((r) => r.o.hour < 9 || r.o.hour >= 19).length;
+    const fmtH = (v) => (Number.isInteger(v) ? count(v) : v.toFixed(1));
+    document.getElementById("timing").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Order &amp; delivery timing</h3>
+        <span class="t-meta">${typical ? "Average per working day across the month" : dayLabel(state.timingDay)} · shaded hours sit outside 9 AM–7 PM</span></div>
+        <div class="controls"><div class="legend"><span><i style="background:var(--s2)"></i>Orders collected</span><span><i style="background:var(--s1)"></i>Deliveries updated</span></div>
+        <label class="ctl"><span class="t-lbl">Day</span><select id="timing-day"><option value="typical">Typical day</option>${days.map((d) => `<option value="${d}"${d === state.timingDay ? " selected" : ""}>${dayLabel(d)}</option>`).join("")}</select></label></div></div>
+      ${totalOrders ? lineChart({
+        labels: hours.map(hourLabel), height: 280,
+        series: [{ values: orders, color: "--s2" }, { values: dels, color: "--s1" }],
+        yFormat: (v) => fmtH(v), shade: [[0, 1], [11, 13]],
+        peaks: [{ series: 0, i: oPeak, label: `peak ${hourLabel(hours[oPeak])}` }, ...(Math.max(...dels) > 0 ? [{ series: 1, i: dPeak, label: `peak ${hourLabel(hours[dPeak])}` }] : [])],
+        tipFor: (i) => `<b>${hourLabel(hours[i])}</b><br>${fmtH(orders[i])} orders · ${fmtH(dels[i])} deliveries`,
+      }) : '<p class="t-meta">No orders on this day in scope.</p>'}
+      <div class="stats">
+        <div class="stat"><span class="t-lbl">Busiest order hour</span><b>${hourLabel(hours[oPeak])}</b><span class="t-meta">${fmtH(orders[oPeak])} orders</span></div>
+        <div class="stat"><span class="t-lbl">Busiest delivery hour</span><b>${Math.max(...dels) ? hourLabel(hours[dPeak]) : "—"}</b><span class="t-meta">${fmtH(dels[dPeak])} notes</span></div>
+        <div class="stat"><span class="t-lbl">Half the orders in by</span><b>${half === null ? "—" : hourLabel(half + 1)}</b><span class="t-meta">50% of the day's orders raised by then</span></div>
+        <div class="stat"><span class="t-lbl">Raised outside 9 AM–7 PM</span><b>${pct(orderRows.length ? outside / orderRows.length : null)}</b><span class="t-meta">late or early entry, not in-market collection</span></div>
+      </div>`;
+  }
+
+  /* ── stock ───────────────────────────────────────────────────────────── */
+  function stockInScope(row) {
+    if (!distributorInScope(row.distributor)) return false;
+    if (state.filters.brand && SKU[row.sku].brand !== state.filters.brand) return false;
+    return true;
+  }
+  function renderStock() {
+    const rows = DATA.stock.filter(stockInScope).map((s) => ({ ...s, brand: BRAND[SKU[s.sku].brand].name, skuName: SKU[s.sku].name, dist: DIST[s.distributor].name, available: s.onHand - s.reserved }));
+    const columns = [
+      { key: "brand", label: "Brand", text: true, sort: (r) => r.brand, cell: (r) => esc(r.brand) },
+      { key: "sku", label: "SKU", text: true, cls: "l wrap", sort: (r) => r.skuName, cell: (r) => esc(r.skuName) },
+      { key: "dist", label: "Distributor", text: true, cls: "l wrap", sort: (r) => r.dist, cell: (r) => esc(r.dist) },
+      { key: "onHand", label: "Floor stock", sort: (r) => r.onHand, cell: (r) => count(r.onHand) },
+      { key: "reserved", label: "Reserved qty", sort: (r) => r.reserved, cell: (r) => count(r.reserved) },
+      { key: "available", label: "Available qty", sort: (r) => r.available, cell: (r) => `<span class="${r.available <= 0 ? "behind" : ""}">${count(r.available)}</span>` },
+    ];
+    document.getElementById("stock-sku").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Stock by SKU</h3>
+        <span class="t-meta">Distributor warehouse stock, snapshot at ${dayLabel(AS_OF)}. Reserved is stock already promised to open orders.</span></div></div>
+      ${table("stock", columns, rows, { key: "onHand", dir: "desc" })}
+      <div class="tbl-foot"><span>${count(rows.length)} distributor × SKU lines</span><span>${count(sum(rows, (r) => r.onHand))} on the floor · ${count(sum(rows, (r) => r.available))} available</span></div>`;
+  }
+
+  /* What a distributor should buy in (primary) so its floor stock covers the
+     next N days of the demand its own field force is booking.
+     1. Demand is ORDERED qty, not delivered: delivered is censored by the very
+        stock-outs this card exists to fix.
+     2. The window ends YESTERDAY: today is a partial day and would drag every
+        rate down, most of all in the morning when a buyer reads this.
+     3. The rate divides by CALENDAR days: stock drains against the calendar. */
+  function renderCoverPlan() {
+    const target = state.coverTarget, windowDays = state.coverWindow;
+    const end = CAL.addDays(AS_OF, -1), start = CAL.addDays(end, -windowDays + 1);
+    const demand = {};
+    DATA.orders.forEach((o) => {
+      if (o.date < start || o.date > end) return;
+      o.lines.forEach((l) => { const k = `${o.distributor}|${l.sku}`; demand[k] = (demand[k] || 0) + l.qty; });
+    });
+    const stockMap = {};
+    DATA.stock.forEach((s) => (stockMap[`${s.distributor}|${s.sku}`] = s));
+    const keys = new Set([...Object.keys(demand), ...Object.keys(stockMap)]);
+    const rows = [];
+    keys.forEach((k) => {
+      const [distributor, sku] = k.split("|");
+      if (!stockInScope({ distributor, sku })) return;
+      const onHand = stockMap[k] ? stockMap[k].onHand : 0;
+      const rate = (demand[k] || 0) / windowDays;
+      if (!onHand && !rate) return;
+      const cover = rate ? onHand / rate : Infinity;
+      const pack = SKU[sku].pack;
+      const need = Math.max(0, rate * target - onHand);
+      const orderQty = need ? Math.ceil(need / pack) * pack : 0;
+      const status = rate && onHand <= 0 ? { label: "Stocked out", tone: "behind", rank: 1 }
+        : cover < Math.min(3, target / 2) ? { label: "Critical", tone: "behind", rank: 2 }
+        : cover < target ? { label: "Low", tone: "watch", rank: 3 }
+        : { label: "Covered", tone: "ok", rank: 4 };
+      rows.push({ distributor, dist: DIST[distributor].name, skuName: SKU[sku].name, brand: BRAND[SKU[sku].brand].name, onHand, rate, cover, ratio: Number.isFinite(cover) ? Math.min(1, cover / target) : 1, orderQty, status });
+    });
+    const toOrder = rows.filter((r) => r.orderQty > 0);
+    const columns = [
+      { key: "dist", label: "Distributor", text: true, cls: "l wrap", sort: (r) => r.dist, cell: (r) => esc(r.dist) },
+      { key: "sku", label: "SKU", text: true, cls: "l who wrap", sort: (r) => r.skuName, cell: (r) => `${esc(r.skuName)}<span>${esc(r.brand)}</span>` },
+      { key: "status", label: "Status", sort: (r) => r.status.rank, cell: (r) => pill(r.status) },
+      { key: "onHand", label: "On hand", sort: (r) => r.onHand, cell: (r) => count(r.onHand) },
+      { key: "rate", label: "Demand / day", sort: (r) => r.rate, cell: (r) => tenth(r.rate) },
+      { key: "cover", label: "Days cover", sort: (r) => (Number.isFinite(r.cover) ? r.cover : 1e9), cell: (r) => inbar(r.ratio, `--${r.status.tone}`, Number.isFinite(r.cover) ? tenth(r.cover) : "∞") },
+      { key: "orderQty", label: "Order qty", sort: (r) => r.orderQty, cell: (r) => `<b>${count(r.orderQty)}</b>` },
+    ];
+    document.getElementById("cover-plan").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Primary order plan</h3>
+        <span class="t-meta">Suggested replenishment so each distributor's floor stock covers the next ${target} days of field-force demand. Demand is ordered quantity over the ${windowDays} days to ${dayLabel(end)}, rounded up to whole cartons.</span></div>
+        <div class="controls">
+          <label class="ctl"><span class="t-lbl">Cover target</span><select id="cover-target">${[7, 14, 21].map((d) => `<option value="${d}"${d === target ? " selected" : ""}>${d} days</option>`).join("")}</select></label>
+          <label class="ctl"><span class="t-lbl">Demand window</span><select id="cover-window">${[7, 14, 30].map((d) => `<option value="${d}"${d === windowDays ? " selected" : ""}>Last ${d} days</option>`).join("")}</select></label>
+        </div></div>
+      <div class="stats">
+        <div class="stat"><span class="t-lbl">SKU lines to order</span><b>${count(toOrder.length)}</b></div>
+        <div class="stat"><span class="t-lbl">Units to order</span><b>${count(sum(toOrder, (r) => r.orderQty))}</b></div>
+        <div class="stat"><span class="t-lbl">Distributors affected</span><b>${count(new Set(toOrder.map((r) => r.distributor)).size)}</b></div>
+        <div class="stat"><span class="t-lbl">Stocked out now</span><b class="behind">${count(rows.filter((r) => r.status.label === "Stocked out").length)}</b></div>
+      </div>
+      ${table("cover", columns, rows, { key: "orderQty", dir: "desc" })}
+      <div class="tbl-foot"><span>Units to order · ${count(toOrder.length)} lines</span><span>${count(sum(toOrder, (r) => r.orderQty))}</span></div>`;
+  }
+
+  /* ── coverage map ────────────────────────────────────────────────────── */
+  const MAP_W = 470, MAP_H = 640;
+  const DIVISION_DISPLAY = { Chittagong: "Chattogram", Barisal: "Barishal" };
+  const merc = ([lon, lat]) => [lon, Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) * (180 / Math.PI)];
+  const projection = (() => {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    const walk = (c) => (typeof c[0] === "number" ? (() => { const [x, y] = merc(c); minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); })() : c.forEach(walk));
+    window.BD_DIVISIONS.features.forEach((f) => walk(f.geometry.coordinates));
+    const padX = 24, padTop = 56, padBottom = 40;
+    const k = Math.min((MAP_W - padX * 2) / (maxX - minX), (MAP_H - padTop - padBottom) / (maxY - minY));
+    const ox = (MAP_W - (maxX - minX) * k) / 2;
+    return (lonlat) => { const [x, y] = merc(lonlat); return [ox + (x - minX) * k, padTop + (maxY - y) * k]; };
+  })();
+  const DIVISION_PATHS = window.BD_DIVISIONS.features.map((f, i) => {
+    const polys = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
+    const d = polys.map((poly) => poly.map((ring) => ring.map((c, j) => { const [x, y] = projection(c); return `${j ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`; }).join("") + "Z").join("")).join("");
+    const name = DIVISION_DISPLAY[f.properties.name] || f.properties.name;
+    return { name, d, label: projection(f.properties.label), fill: `--map-${(i % 4) + 1}` };
+  });
+  const SHOP_XY = Object.fromEntries(DATA.shops.map((s) => [s.id, projection([s.lon, s.lat])]));
+  const DHAKA_BOX = (() => { const [x0, y0] = projection([90.2, 24.1]); const [x1, y1] = projection([90.64, 23.56]); return [x0, y0, x1 - x0, y1 - y0]; })();
+  const DHAKA_ZOOM = Math.min(MAP_W / DHAKA_BOX[2], MAP_H / DHAKA_BOX[3]);
+
+  function renderCoverage(view) {
+    const prog = progress(state.period);
+    const shops = DATA.shops.filter((s) => shopInScope(s) && s.opened <= `${state.period}-31`);
+    const perf = {};
+    view.period.forEach((r) => {
+      const p = (perf[r.o.shop] = perf[r.o.shop] || { orders: 0, ordered: 0, delivered: 0, last: "" });
+      p.orders++; p.ordered += r.ordered; p.delivered += r.delivered; if (r.o.date > p.last) p.last = r.o.date;
+    });
+    const mode = state.mapMode;
+    const colorOf = (s) => {
+      const p = perf[s.id];
+      if (mode === "activity") return p && p.delivered > 0 ? "--s1" : "--zero";
+      if (mode === "sales") return !p || !p.delivered ? "--zero" : p.delivered >= 40000 ? "--s2" : "--s1";
+      if (!p) return "--zero";
+      const ratio = p.ordered ? p.delivered / p.ordered : 0;
+      return ratio < 0.5 ? "--behind" : ratio < 0.8 ? "--watch" : "--ok";
+    };
+    const legends = {
+      activity: [["--s1", "Sold this period"], ["--zero", "No sale"]],
+      sales: [["--s2", "40,000+ delivered"], ["--s1", "Delivered"], ["--zero", "No sale"]],
+      risk: [["--behind", "Under 50% delivered"], ["--watch", "50–80%"], ["--ok", "80%+"], ["--zero", "No order"]],
+    };
+    const zoomed = state.mapView === "dhaka";
+    const vb = zoomed ? DHAKA_BOX.join(" ") : `0 0 ${MAP_W} ${MAP_H}`;
+    const r = zoomed ? 3.4 / DHAKA_ZOOM : 2.9;
+    const byDivision = {};
+    shops.forEach((s) => (byDivision[s.division] = (byDivision[s.division] || 0) + 1));
+    // Draw grey (no-sale) pins first so the coloured ones sit on top.
+    const ordered = shops.slice().sort((a, b) => (colorOf(a) === "--zero" ? 0 : 1) - (colorOf(b) === "--zero" ? 0 : 1));
+    let svg = `<svg class="map-svg" viewBox="${vb}" role="img" aria-label="Map of retail shops by division">`;
+    DIVISION_PATHS.forEach((p) => (svg += `<path class="div-shape" d="${p.d}" fill="var(${p.fill})"/>`));
+    ordered.forEach((s) => {
+      const [x, y] = SHOP_XY[s.id];
+      const p = perf[s.id];
+      svg += `<circle class="pin${state.selectedShop === s.id ? " sel" : ""}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="var(${colorOf(s)})" data-shop="${s.id}"
+        data-tip="${esc(`<b>${esc(s.name)}</b><br>${esc(DIST[s.distributor].name)}<br>${p ? `${count(p.delivered)} delivered · ${p.orders} orders` : "No order this period"}`)}"/>`;
+    });
+    if (!zoomed) DIVISION_PATHS.forEach((p) => {
+      svg += `<text class="div-name" x="${p.label[0]}" y="${p.label[1]}">${esc(p.name.toUpperCase())}</text><text class="div-count" x="${p.label[0]}" y="${p.label[1] + 13}">${count(byDivision[p.name] || 0)} shops</text>`;
+    });
+    svg += "</svg>";
+
+    const active = shops.filter((s) => perf[s.id] && perf[s.id].delivered > 0);
+    const delivered = sum(active, (s) => perf[s.id].delivered);
+    const top10 = active.map((s) => perf[s.id].delivered).sort((a, b) => b - a).slice(0, 10);
+    const sel = state.selectedShop && SHOP[state.selectedShop];
+    const sp = sel && perf[sel.id];
+    const inspector = sel ? `<div class="card-divider" style="display:grid;gap:12px">
+        <div><h3 class="t-card">${esc(sel.name)}</h3><span class="t-meta">${esc(sel.id)} · ${esc(TERR[sel.territory].name)}, ${esc(sel.division)} · opened ${dayLabel(sel.opened)}</span></div>
+        <div class="kv">
+          <div class="stat"><span class="t-lbl">Distributor</span><span>${esc(DIST[sel.distributor].name)}</span></div>
+          <div class="stat"><span class="t-lbl">SR</span><span>${esc(SR[sel.sr].name)}</span></div>
+          <div class="stat"><span class="t-lbl">Orders · ${MONTH_NAMES[+state.period.slice(5) - 1]}</span><b>${count(sp ? sp.orders : 0)}</b></div>
+          <div class="stat"><span class="t-lbl">Delivered</span><b>${count(sp ? sp.delivered : 0)}</b></div>
+          <div class="stat"><span class="t-lbl">Delivery ratio</span><b>${sp && sp.ordered ? pct(sp.delivered / sp.ordered) : "—"}</b></div>
+          <div class="stat"><span class="t-lbl">Last order</span><b>${sp ? dayLabel(sp.last) : "—"}</b></div>
+        </div></div>`
+      : `<div class="shop-empty">Select a shop pin to inspect its sales and delivery performance.</div>`;
+    const divRows = DIVISIONS.map((d) => {
+      const list = active.filter((s) => s.division === d);
+      return { d, value: sum(list, (s) => perf[s.id].delivered), n: list.length };
+    }).sort((a, b) => b.value - a.value);
+    const fmt = moneyScale(delivered);
+    document.getElementById("coverage-card").innerHTML = `
+      <div class="card-head"><div><h3 class="t-card">Shop coverage</h3>
+        <span class="t-meta">${count(shops.length)} mapped shops in scope · one pin per shop · ${pct(shops.length ? active.length / shops.length : null)} bought this period</span></div></div>
+      <div class="row-map">
+        <div class="map-wrap">
+          <div class="map-tools">${seg("mapMode", [["activity", "Activity"], ["sales", "Sales intensity"], ["risk", "Delivery risk"]], mode, "Colour shops by")}
+            ${seg("mapView", [["country", "Bangladesh"], ["dhaka", "Dhaka metro"]], state.mapView, "Map extent")}</div>
+          ${svg}
+          <div class="map-legend">${legends[mode].map(([c, t]) => `<span><i style="background:var(${c})"></i>${t}</span>`).join("")}</div>
+          <span class="map-credit">Divisions © Natural Earth</span>
+        </div>
+        <div class="shop-panel">
+          ${inspector}
+          <div style="display:grid;gap:12px"><h3 class="t-card">Coverage quality</h3>
+            <div class="kv">
+              <div class="stat"><span class="t-lbl">Zero-sale shops</span><b>${count(shops.length - active.length)}</b><span class="t-meta">no secondary this month</span></div>
+              <div class="stat"><span class="t-lbl">Avg per active shop</span><b>${count(active.length ? delivered / active.length : null)}</b><span class="t-meta">delivered value</span></div>
+              <div class="stat"><span class="t-lbl">Top-10 concentration</span><b>${pct(delivered ? sum(top10, (v) => v) / delivered : null)}</b><span class="t-meta">of delivered value</span></div>
+              <div class="stat"><span class="t-lbl">Projected month end</span><b>${fmt(prog.frac ? delivered / prog.frac : null)}</b><span class="t-meta">${prog.closed ? "month closed" : "at the current daily pace"}</span></div>
+            </div></div>
+          <div><h3 class="t-card">Division split</h3>
+            ${divRows.map((r) => `<div class="split-row"><span><b>${r.d}</b> <span class="t-meta">· ${count(r.n)} active shops</span></span><span class="fig">${fmt(r.value)} <span class="t-meta">${pct(delivered ? r.value / delivered : 0)}</span></span>
+              <span class="bt"><i style="width:${delivered ? (r.value / delivered) * 100 : 0}%"></i></span></div>`).join("")}</div>
+        </div>
+      </div>`;
+  }
+
+  /* ── chrome: period, filters, theme, nav ─────────────────────────────── */
+  function filterOptions(key) {
+    const f = state.filters;
+    const without = { ...f, [key]: "" };
+    if (key === "supervisor") return DATA.supervisors.map((s) => [s.id, s.name]);
+    if (key === "sr") return DATA.srs.filter((s) => srInScope(s.id, without)).map((s) => [s.id, s.name]);
+    if (key === "distributor") return DATA.distributors.filter((d) => distributorInScope(d.id, without)).map((d) => [d.id, d.name]);
+    if (key === "division") return DIVISIONS.map((d) => [d, d]);
+    if (key === "territory") return DATA.territories.filter((t) => !f.division || t.division === f.division).map((t) => [t.id, `${t.name} (${t.division})`]);
+    return DATA.brands.map((b) => [b.id, b.name]);
+  }
+  function filterLabel(key, value) {
+    if (key === "supervisor") return SUP[value].name;
+    if (key === "sr") return SR[value].name;
+    if (key === "distributor") return DIST[value].name;
+    if (key === "territory") return TERR[value].name;
+    if (key === "brand") return BRAND[value].name;
+    return value;
+  }
+  function renderChrome() {
+    document.getElementById("period-label").textContent = monthLabel(state.period);
+    const i = DATA.months.indexOf(state.period);
+    document.getElementById("prev-month").disabled = i <= 0;
+    document.getElementById("next-month").disabled = i >= DATA.months.length - 1;
+    document.getElementById("sync").textContent = `Snapshot ${dayLabel(AS_OF)}, 5:40 PM`;
+    const active = FILTER_KEYS.filter((k) => state.filters[k]);
+    const btn = document.getElementById("filters-btn");
+    btn.innerHTML = `Filters${active.length ? ` <span class="count">${active.length}</span>` : ""}`;
+    btn.setAttribute("aria-expanded", String(state.filtersOpen));
+    const panel = document.getElementById("filter-panel");
+    panel.hidden = !state.filtersOpen;
+    if (state.filtersOpen) {
+      panel.innerHTML = FILTER_KEYS.map((k) => `<label class="field"><span class="t-lbl">${FILTER_LABELS[k]}</span>
+        <select id="filter-${k}" data-filter="${k}"><option value="">${FILTER_ALL[k]}</option>${filterOptions(k).map(([v, t]) => `<option value="${esc(v)}"${state.filters[k] === v ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`).join("");
+    }
+    document.getElementById("chips").innerHTML = active.length
+      ? active.map((k) => `<span class="chip">${FILTER_LABELS[k]}: ${esc(filterLabel(k, state.filters[k]))}<button type="button" data-unfilter="${k}" aria-label="Remove ${FILTER_LABELS[k]} filter">×</button></span>`).join("") + `<button type="button" class="chip-clear" data-unfilter="*">Clear all</button>`
+      : "";
+    document.getElementById("chips").hidden = !active.length;
+    document.getElementById("filterbar").hidden = !state.filtersOpen && !active.length;
+  }
+
+  function render() {
+    const view = buildView();
+    renderChrome();
+    const cards = [renderPulse, renderLeaderboard, renderBrands, renderBlocks, renderTrend, renderOrders, renderDelivery, renderTiming, renderStock, renderCoverPlan, renderCoverage];
+    cards.forEach((fn) => { try { fn(view); } catch (err) { console.error(fn.name, err); } });
+  }
+
+  /* ── events ──────────────────────────────────────────────────────────── */
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button, circle[data-shop]");
+    if (!t) { if (e.target.id === "modal") document.getElementById("modal").hidden = true; return; }
+    if (t.id === "prev-month" || t.id === "next-month") {
+      const i = DATA.months.indexOf(state.period) + (t.id === "prev-month" ? -1 : 1);
+      if (DATA.months[i]) { state.period = DATA.months[i]; state.block = null; state.orderDate = ""; state.timingDay = "typical"; render(); }
+      return;
+    }
+    if (t.id === "filters-btn") { state.filtersOpen = !state.filtersOpen; renderChrome(); return; }
+    if (t.id === "theme-btn") { toggleTheme(); return; }
+    if (t.dataset.sort) {
+      const id = t.dataset.sort, key = t.dataset.key;
+      const cur = state.sorts[id];
+      state.sorts[id] = { key, dir: cur && cur.key === key && cur.dir === "desc" ? "asc" : "desc" };
+      render();
+      return;
+    }
+    if (t.dataset.seg) {
+      const v = t.dataset.value;
+      state[t.dataset.seg] = t.dataset.seg === "block" ? +v : v;
+      render();
+      return;
+    }
+    if (t.dataset.unfilter) {
+      if (t.dataset.unfilter === "*") FILTER_KEYS.forEach((k) => (state.filters[k] = ""));
+      else state.filters[t.dataset.unfilter] = "";
+      render();
+      return;
+    }
+    if (t.dataset.order) { openOrder(t.dataset.order); return; }
+    if (t.dataset.close !== undefined) { document.getElementById("modal").hidden = true; return; }
+    if (t.dataset.shop) { state.selectedShop = state.selectedShop === t.dataset.shop ? null : t.dataset.shop; renderCoverage(buildView()); }
+  });
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.dataset.filter) {
+      state.filters[t.dataset.filter] = t.value;
+      // Clear a child that no longer fits under its new parent.
+      if (t.dataset.filter === "division" && state.filters.territory && TERR[state.filters.territory].division !== t.value) state.filters.territory = "";
+      if (state.filters.sr && !srInScope(state.filters.sr, { ...state.filters, sr: "" })) state.filters.sr = "";
+      if (state.filters.distributor && !distributorInScope(state.filters.distributor, { ...state.filters, distributor: "", sr: "" })) state.filters.distributor = "";
+      render();
+      const again = document.getElementById(t.id);
+      if (again) again.focus();
+      return;
+    }
+    if (t.id === "order-date") { state.orderDate = t.value; renderOrders(buildView()); }
+    if (t.id === "timing-day") { state.timingDay = t.value; renderTiming(buildView()); }
+    if (t.id === "cover-target") { state.coverTarget = +t.value; renderCoverPlan(); }
+    if (t.id === "cover-window") { state.coverWindow = +t.value; renderCoverPlan(); }
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.getElementById("modal").hidden = true; });
+
+  // Tooltips: any element with data-tip, one floating element for the page.
+  const tip = document.getElementById("tip");
+  document.addEventListener("mouseover", (e) => {
+    const t = e.target.closest("[data-tip]");
+    if (!t) { tip.hidden = true; return; }
+    tip.innerHTML = t.getAttribute("data-tip");
+    tip.hidden = false;
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (tip.hidden) return;
+    const x = Math.min(window.innerWidth - tip.offsetWidth - 12, e.clientX + 14);
+    const y = e.clientY + 16 + tip.offsetHeight > window.innerHeight ? e.clientY - tip.offsetHeight - 12 : e.clientY + 16;
+    tip.style.left = `${x}px`;
+    tip.style.top = `${y}px`;
+  });
+
+  function toggleTheme() {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("gt-demo-theme", root.dataset.theme); } catch (err) { /* storage unavailable */ }
+  }
+  try { const saved = localStorage.getItem("gt-demo-theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (err) { /* storage unavailable */ }
+
+  // Section tabs follow the scroll position.
+  const links = [...document.querySelectorAll(".topnav a")];
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      links.forEach((a) => (a.getAttribute("href") === `#${entry.target.id}` ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current")));
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+  ["performance", "delivery", "stock", "coverage"].forEach((id) => spy.observe(document.getElementById(id)));
+
+  render();
+})();
+
+</script>
+</body>
+</html>

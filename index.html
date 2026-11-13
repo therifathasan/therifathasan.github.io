@@ -1,0 +1,1134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Md Rifat Hasan · Business Analytics Portfolio</title>
+<meta name="description" content="Business analytics portfolio of Md Rifat Hasan: Haribo demand planning in Excel, a Power BI management sales dashboard, and a live general-trade sales dashboard.">
+<meta property="og:title" content="Md Rifat Hasan · Business Analytics Portfolio">
+<meta property="og:description" content="Three analytics case studies from an FMCG importer and distributor: demand planning, a Power BI dashboard and a live sales dashboard.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#121820">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121820'/%3E%3Crect x='14' y='34' width='8' height='16' rx='2' fill='%23b7d3f6'/%3E%3Crect x='28' y='24' width='8' height='26' rx='2' fill='%235598e7'/%3E%3Crect x='42' y='14' width='8' height='36' rx='2' fill='%232a78d6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+/* Web-native case-study layout in the PDF's visual language:
+   ink rules, blue carries data, orange marks limits, red marks problems. */
+:root {
+  --paper: #ffffff;
+  --tint: #f2f5f8;
+  --tint-2: #e9eef3;
+  --ink: #121820;
+  --ink-2: #47515e;
+  --ink-3: #6f7a89;
+  --rule: #dfe4ea;
+  --blue: #2a78d6;
+  --blue-soft: #b7d3f6;
+  --blue-wash: #eef5fd;
+  --orange: #eb6834;
+  --crit: #d03b3b;
+  --crit-wash: #fdf1f1;
+  --good: #0ca30c;
+  --h1: #cde2fb; --h2: #9ec5f4; --h3: #5598e7; --h4: #256abf; --h5: #104281;
+  --sans: "Geist", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --wrap: 1200px;
+  --nm: 200px;
+  --head: 48px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--head) + 16px); }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3, h4 { letter-spacing: -0.025em; text-wrap: balance; }
+a { color: inherit; }
+img { max-width: 100%; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: var(--wrap); margin-inline: auto; padding-inline: 24px; }
+.lbl { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.small { font-size: 13.5px; color: var(--ink-3); line-height: 1.5; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* reveal on scroll (only when JS runs, and not for reduced motion) */
+.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.js .reveal.in { opacity: 1; transform: none; }
+
+/* ── header ─────────────────────────────────────────── */
+.top { position: sticky; top: 0; z-index: 40; height: var(--head); background: color-mix(in srgb, var(--paper) 90%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--rule); }
+.top .wrap { height: 100%; display: flex; align-items: center; justify-content: center; }
+.top nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; min-width: 0; margin-inline: auto; }
+.top nav::-webkit-scrollbar { display: none; }
+.top nav a { flex: none; padding: 5px 12px; border-radius: 7px; font-size: 14px; color: var(--ink-2); text-decoration: none; white-space: nowrap; transition: background .15s, color .15s; }
+.top nav a:hover { background: var(--tint); color: var(--ink); }
+.top nav a.on { color: var(--ink); background: var(--tint); }
+.progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: var(--blue); }
+
+/* ── hero ───────────────────────────────────────────── */
+.hero { background: var(--ink); color: #fff; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; inset: auto -10% -40% auto; width: 60vw; height: 60vw; max-width: 760px; max-height: 760px; background: radial-gradient(closest-side, rgba(42, 120, 214, .28), transparent); pointer-events: none; }
+.hero .wrap { position: relative; padding-block: 104px 96px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 64px; align-items: end; }
+.hero .lbl { color: #9aa6b4; }
+.hero h1 { white-space: nowrap; font-size: clamp(36px, 5.6vw, 80px); font-weight: 600; line-height: .94; letter-spacing: -0.055em; margin-top: 22px; }
+.hero .lede { margin-top: 28px; font-size: clamp(18px, 1.7vw, 21px); line-height: 1.55; color: #c9d2dc; max-width: 32em; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip { font-family: var(--mono); font-size: 12.5px; padding: 4px 11px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink-2); white-space: nowrap; background: var(--paper); }
+.hero .chips { margin-top: 30px; }
+.hero .chip { background: rgba(255, 255, 255, .03); border-color: #3a4554; color: #c9d2dc; }
+.pcards { display: grid; gap: 12px; }
+.pcard { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 2px 14px; align-items: center; padding: 18px 20px; border: 1px solid #2a333e; border-radius: 14px; background: rgba(255, 255, 255, .03); text-decoration: none; transition: border-color .2s, background .2s, transform .2s; }
+.pcard:hover { border-color: #4b5868; background: rgba(255, 255, 255, .06); transform: translateY(-2px); }
+.pcard .n { grid-row: span 2; font-family: var(--mono); font-size: 13px; color: #9aa6b4; }
+.pcard .t { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.pcard .d { grid-column: 2; font-size: 14px; color: #9aa6b4; }
+.pcard .go { grid-row: 1 / span 2; grid-column: 3; color: #9aa6b4; font-size: 18px; transition: transform .2s, color .2s; }
+.pcard:hover .go { transform: translateX(3px); color: #fff; }
+.tag { display: inline-block; font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; vertical-align: 3px; margin-left: 8px; }
+.tag.main { background: var(--blue); color: #fff; }
+.tag.ai { border: 1px solid #6f7a89; color: #c9d2dc; }
+
+/* ── chapter ────────────────────────────────────────── */
+.chapter { scroll-margin-top: var(--head); }
+.ch-head { background: var(--tint); border-block: 1px solid var(--rule); }
+.ch-head .wrap { padding-block: 88px 64px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px 64px; align-items: end; }
+.ch-num { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
+.ch-head h2 { font-size: clamp(40px, 6vw, 72px); font-weight: 600; line-height: .98; letter-spacing: -0.05em; margin-top: 14px; }
+.ch-head h2 .tag { vertical-align: 18px; }
+.ch-head h2 .tag.ai { border-color: var(--ink-3); color: var(--ink-2); }
+.ch-head .summary { margin-top: 20px; font-size: 19px; color: var(--ink-2); max-width: 34em; }
+.meta { display: grid; gap: 0; border-top: 1px solid var(--ink); }
+.meta > div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+.meta dt { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding-top: 2px; }
+.meta dd { margin: 0; color: var(--ink); }
+.ch-body .wrap { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 56px; }
+.rail { position: sticky; top: calc(var(--head) + 40px); align-self: start; padding-top: 72px; display: grid; gap: 4px; }
+.rail .lbl { margin-bottom: 8px; }
+.rail a { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 15px; color: var(--ink-3); text-decoration: none; transition: color .15s; }
+.rail a::before { content: ""; width: 18px; height: 2px; border-radius: 2px; background: var(--rule); transition: width .2s, background .2s; }
+.rail a:hover { color: var(--ink); }
+.rail a.on { color: var(--ink); font-weight: 600; }
+.rail a.on::before { width: 28px; background: var(--blue); }
+.rail .dl { margin-top: 18px; justify-content: center; padding: 0 14px; font-size: 14px; color: var(--ink); }
+.rail a.btn::before { display: none; }
+.nm-s { --nm: 150px; } .nm-m { --nm: 172px; }
+.params.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sec { padding-block: 72px; border-bottom: 1px solid var(--rule); min-width: 0; display: flex; flex-direction: column; gap: 32px; }
+.sec:last-child { border-bottom: 0; }
+.sec-head .stage { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--blue); }
+.sec-head .stage::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.sec-head h3 { font-size: clamp(30px, 3.8vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -0.04em; margin-top: 12px; max-width: 22em; }
+.sec-head .sub { margin-top: 14px; font-size: 18px; color: var(--ink-2); max-width: 44em; }
+.sec-head .status { margin-top: 18px; }
+.step { display: grid; gap: 22px; padding-top: 8px; }
+.step + .step { padding-top: 40px; border-top: 1px dashed var(--rule); }
+.step-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; align-items: baseline; }
+.step-head .k { grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-family: var(--mono); font-size: 14px; font-weight: 600; align-self: start; }
+.step-head h4 { font-size: 23px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.25; }
+.step-head p { font-size: 16.5px; color: var(--ink-2); max-width: 46em; }
+.status { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px rgba(12, 163, 12, .15); }
+
+/* ── shared blocks ──────────────────────────────────── */
+.cols { display: grid; gap: 28px; min-width: 0; }
+.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.panel { border: 1px solid var(--rule); border-radius: 14px; padding: 24px; min-width: 0; background: var(--paper); }
+.panel.soft { background: var(--tint); border-color: transparent; }
+.h5 { font-size: 17px; font-weight: 600; letter-spacing: -0.015em; }
+.h5 + p { margin-top: 3px; font-size: 14px; color: var(--ink-3); }
+.p-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; margin-bottom: 16px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.legend i.line { height: 2px; width: 15px; vertical-align: 3px; border-radius: 0; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--ink); }
+.stats.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stats > div { padding: 20px 22px 4px 0; display: grid; gap: 8px; align-content: start; }
+.stats > div + div { padding-left: 22px; border-left: 1px solid var(--rule); }
+.stats b { font-size: clamp(34px, 4vw, 48px); font-weight: 600; letter-spacing: -0.045em; line-height: 1; }
+.stats b small { font-size: .45em; letter-spacing: 0; color: var(--ink-3); font-weight: 500; margin-left: 3px; }
+.stats span { font-size: 14.5px; color: var(--ink-2); line-height: 1.45; }
+.question { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 10px 32px; align-items: baseline; padding: 32px 36px; border-radius: 16px; background: var(--ink); }
+.question .lbl { color: #9aa6b4; }
+.question p { font-size: clamp(20px, 2.2vw, 26px); font-weight: 500; line-height: 1.35; letter-spacing: -0.02em; max-width: 30em; color: #fff; }
+.gaps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.gaps.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gaps > div { padding: 18px 20px 20px; border-radius: 12px; background: var(--tint); display: grid; gap: 6px; align-content: start; }
+.gaps .lbl { color: var(--crit); font-weight: 600; }
+.gaps b { font-size: 17px; font-weight: 600; letter-spacing: -0.015em; }
+.gaps b.big { font-size: 44px; letter-spacing: -0.045em; line-height: 1; margin-top: 4px; }
+.gaps b.big small { font-size: .4em; letter-spacing: 0; color: var(--ink-3); font-weight: 500; margin-left: 4px; }
+.gaps p { font-size: 14.5px; color: var(--ink-2); line-height: 1.45; }
+.blk { display: grid; gap: 12px; }
+.hard { display: grid; border-top: 1px solid var(--ink); }
+.hard .lbl { padding: 12px 0 4px; }
+.hard > div { display: grid; grid-template-columns: 156px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.hard b { font-size: 26px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+.hard span { font-size: 15.5px; color: var(--ink-2); }
+
+/* bar rows */
+.bars { display: grid; gap: 3px; }
+.brow { display: grid; grid-template-columns: var(--nm) minmax(0, 1fr) 48px; gap: 12px; align-items: center; font-size: 13.5px; border-radius: 4px; }
+.brow:hover { background: var(--tint); }
+.brow .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); padding-left: 2px; }
+.brow .val { font-family: var(--mono); font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; padding-right: 2px; }
+.track { position: relative; height: 14px; }
+.track i { position: absolute; top: 0; bottom: 0; }
+.track .gl { top: -2px; bottom: -2px; width: 1px; background: var(--rule); }
+.track .cap { top: -3px; bottom: -3px; width: 2px; background: var(--orange); }
+.track .zero { top: -3px; bottom: -3px; width: 1px; background: var(--ink-3); }
+.axisrow { display: grid; grid-template-columns: var(--nm) minmax(0, 1fr) 48px; gap: 12px; margin-bottom: 4px; }
+.axisrow .ax { position: relative; height: 16px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+.axisrow .ax span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.oos { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--crit); margin-left: 6px; vertical-align: 1px; }
+
+/* four questions + worked example */
+.qs { display: grid; align-content: start; border-top: 1px solid var(--ink); }
+.qs > div { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 3px 12px; padding: 18px 0; border-bottom: 1px solid var(--rule); }
+.qs .n { grid-row: span 2; width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.qs b { font-size: 17.5px; font-weight: 600; letter-spacing: -0.01em; }
+.qs span { font-size: 15px; color: var(--ink-2); }
+.calc { display: grid; border-top: 1px solid var(--rule); margin-top: 14px; }
+.calc > div { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 14.5px; color: var(--ink-2); }
+.calc b { font-family: var(--mono); font-weight: 600; color: var(--ink); white-space: nowrap; }
+.calc .tot { color: var(--ink); font-weight: 600; border-bottom: 1.5px solid var(--ink); }
+.calc .blue { color: var(--blue); }
+.ruler-wrap { margin-top: 36px; min-width: 420px; }
+.ruler { position: relative; height: 44px; border-radius: 8px; background: var(--tint); }
+.ruler i { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; font-style: normal; font-family: var(--mono); font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; }
+.ruler .mk { top: -9px; bottom: -9px; width: 2px; overflow: visible; }
+.ruler .mk span { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11.5px; font-weight: 500; }
+.ruler-scale { position: relative; height: 16px; margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+.ruler-scale span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.sticky-col { position: sticky; top: calc(var(--head) + 24px); align-self: start; }
+
+/* charts */
+svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
+svg.chart text { font-family: var(--mono); font-size: 10.5px; fill: var(--ink-3); }
+svg.chart .grid { stroke: var(--rule); stroke-width: 1; }
+svg.chart .base { stroke: var(--ink-3); stroke-width: 1; }
+svg.chart .hit { fill: transparent; cursor: default; }
+
+/* container */
+.cont-bar { position: relative; height: 52px; border-radius: 8px; background: var(--tint); margin-top: 16px; }
+.cont-bar i { position: absolute; top: 0; bottom: 0; }
+.cont-bar .mark { top: -6px; bottom: -6px; width: 2px; background: var(--ink); }
+.cont-bar .out { border: 1.5px dashed var(--ink-3); border-left: 0; border-radius: 0 8px 8px 0; background: transparent; }
+.cont-bar span { position: absolute; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 12.5px; font-weight: 600; }
+.cont-scale { position: relative; height: 16px; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+.cont-scale span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.params { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.params div { padding: 12px 14px; border-radius: 10px; background: var(--tint); display: grid; gap: 2px; }
+.params b { font-size: 21px; font-weight: 600; letter-spacing: -0.03em; }
+
+/* heatmap */
+.heat { display: grid; grid-template-columns: 200px repeat(17, minmax(30px, 1fr)); gap: 3px; font-size: 13px; min-width: 820px; }
+.heat .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); padding-right: 8px; align-self: center; }
+.heat .hd { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); text-align: center; padding-bottom: 4px; line-height: 1.2; }
+.heat .hd.arr { color: var(--ink); font-weight: 600; }
+.heat .c { height: 18px; border-radius: 3px; transition: transform .1s; }
+.heat .c:hover { transform: scale(1.15); }
+.heat .c.arr { box-shadow: inset 0 0 0 2px var(--ink); }
+.heat-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 12.5px; color: var(--ink-2); }
+.heat-legend i { display: inline-block; width: 14px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.swipe { display: none; margin-bottom: 8px; }
+
+/* flows */
+.srcflow { display: grid; grid-template-columns: 1fr 104px 1.1fr 104px 0.9fr; align-items: center; }
+.srcflow .stack { display: grid; gap: 8px; }
+.srcflow .node { padding: 14px 18px; border: 1.5px solid var(--ink); border-radius: 12px; display: grid; gap: 2px; background: var(--paper); }
+.srcflow .node b { font-size: 16px; font-weight: 600; }
+.srcflow .node span:not(.lbl) { font-size: 13.5px; color: var(--ink-2); line-height: 1.4; }
+.srcflow .node.hand { border: 1.5px dashed var(--crit); background: var(--crit-wash); }
+.srcflow .leg { position: relative; text-align: center; display: grid; padding-bottom: 16px; }
+.srcflow .leg::after { content: ""; position: absolute; left: 8px; right: 12px; bottom: 6px; height: 1.5px; background: var(--ink-3); }
+.srcflow .leg::before { content: ""; position: absolute; right: 8px; bottom: 2px; width: 8px; height: 8px; border-top: 1.5px solid var(--ink-3); border-right: 1.5px solid var(--ink-3); transform: rotate(45deg); }
+.srcflow .leg b { font-size: 14px; font-weight: 600; color: var(--crit); }
+.srcflow .leg span { font-size: 12px; color: var(--ink-3); }
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.flow > div { position: relative; padding: 18px 20px; border: 1px solid var(--rule); display: grid; gap: 4px; align-content: start; background: var(--paper); }
+.flow > div + div { border-left: 0; }
+.flow > div:first-child { border-radius: 12px 0 0 12px; }
+.flow > div:last-child { border-radius: 0 12px 12px 0; background: var(--blue-wash); }
+.flow > div + div::before { content: ""; position: absolute; left: -6px; top: 50%; width: 11px; height: 11px; margin-top: -5.5px; background: var(--paper); border-top: 1px solid var(--ink-3); border-right: 1px solid var(--ink-3); transform: rotate(45deg); }
+.flow b { font-size: 16px; font-weight: 600; }
+.flow span { font-size: 13.5px; color: var(--ink-2); line-height: 1.45; }
+.layers { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.layers em { font-style: normal; font-family: var(--mono); font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--tint); color: var(--ink-2); }
+.who ul { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.who li { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; font-size: 15.5px; color: var(--ink-2); line-height: 1.45; }
+.who li::before { content: ""; width: 8px; height: 8px; margin-top: 8px; border-radius: 2px; background: var(--blue); }
+.who.ai li::before { background: var(--ink-3); }
+.steps3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.steps3 > div { padding: 18px 20px; border-radius: 12px; background: var(--tint); display: grid; gap: 6px; align-content: start; }
+.steps3 .k { font-family: var(--mono); font-size: 12px; color: var(--blue); font-weight: 600; }
+.steps3 b { font-size: 16.5px; font-weight: 600; }
+.steps3 span { font-size: 14.5px; color: var(--ink-2); line-height: 1.45; }
+.changed { display: grid; border-top: 1px solid var(--ink); align-content: start; }
+.changed .lbl { padding-top: 12px; }
+.changed > div { padding: 16px 0; border-bottom: 1px solid var(--rule); display: grid; gap: 4px; }
+.changed b { font-size: 28px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.05; }
+.changed span { font-size: 15px; color: var(--ink-2); line-height: 1.45; }
+
+/* screenshots, gallery, lightbox */
+.shot { margin: 0; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.shot button { display: block; padding: 0; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--paper); cursor: zoom-in; transition: border-color .15s, box-shadow .2s, transform .2s; }
+.shot button:hover { border-color: var(--ink-3); box-shadow: 0 10px 30px rgba(18, 24, 32, .10); transform: translateY(-2px); }
+.shot img { display: block; width: 100%; height: auto; }
+.shot figcaption { font-size: 14.5px; color: var(--ink-2); line-height: 1.5; }
+.shot figcaption b { color: var(--ink); font-weight: 600; }
+.full-shot { max-height: 640px; overflow-y: auto; border: 1px solid var(--rule); border-radius: 12px; }
+.full-shot img { display: block; width: 100%; height: auto; }
+.gallery { display: grid; gap: 16px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: var(--tint); width: fit-content; max-width: 100%; }
+.tabs button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; font-size: 14px; color: var(--ink-2); cursor: pointer; transition: background .15s, color .15s; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(18, 24, 32, .1); }
+dialog.lightbox { width: min(1400px, 96vw); max-height: 94vh; padding: 0; border: 0; border-radius: 14px; background: var(--paper); box-shadow: 0 30px 80px rgba(0, 0, 0, .35); }
+dialog.lightbox::backdrop { background: rgba(18, 24, 32, .72); backdrop-filter: blur(3px); }
+dialog.lightbox .lb-bar { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--ink-2); }
+dialog.lightbox .lb-close { border: 1px solid var(--rule); background: var(--paper); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
+dialog.lightbox img { display: block; width: 100%; height: auto; }
+
+/* CTA + download */
+.cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 28px; padding: 24px 28px; border-radius: 14px; background: var(--blue-wash); border: 1px solid #d3e4f8; }
+.cta p { font-size: 16px; color: var(--ink-2); max-width: 40em; }
+.cta p b { color: var(--ink); }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--ink); background: var(--ink); color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: transform .15s, box-shadow .15s; }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(18, 24, 32, .18); }
+.btn small { font-family: var(--mono); font-weight: 500; font-size: 12px; color: #9aa6b4; }
+.btn.ghost { background: var(--paper); color: var(--ink); border-color: var(--rule); }
+.btn.ghost small { color: var(--ink-3); }
+
+/* star schema */
+svg.star text { font-family: var(--sans); fill: var(--ink); }
+svg.star .s { font-family: var(--mono); font-size: 7.5px; fill: var(--ink-3); }
+svg.star .dim { fill: #fff; stroke: var(--rule); }
+svg.star .fact { fill: #e8f1fc; stroke: var(--blue); }
+svg.star .link { stroke: var(--ink-3); stroke-width: 1; }
+
+/* framed screenshots */
+.frame { margin: 0; display: grid; gap: 12px; min-width: 0; }
+.frame .fbox { border-radius: 18px; padding: clamp(12px, 2.2vw, 26px); padding-top: 0; background: linear-gradient(180deg, #f5f8fb 0%, #e8eef4 100%); border: 1px solid var(--rule); }
+.frame .fbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; height: 44px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.frame .fbar span:last-child { text-transform: none; letter-spacing: 0; font-family: var(--sans); font-size: 13px; }
+.frame button { display: block; width: 100%; padding: 0; border: 0; border-radius: 10px; overflow: hidden; background: #fff; cursor: zoom-in; box-shadow: 0 1px 2px rgba(18, 24, 32, .06), 0 14px 34px rgba(18, 24, 32, .12); transition: transform .25s, box-shadow .25s; }
+.frame button:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(18, 24, 32, .06), 0 22px 44px rgba(18, 24, 32, .16); }
+.frame img { display: block; width: 100%; height: auto; }
+.frame figcaption { font-size: 15px; color: var(--ink-2); line-height: 1.5; max-width: 52em; }
+.frame figcaption b { color: var(--ink); font-weight: 600; }
+.frame .scrollbox { max-height: 680px; overflow-y: auto; border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgba(18, 24, 32, .06), 0 14px 34px rgba(18, 24, 32, .12); }
+.frame .scrollbox img { display: block; width: 100%; height: auto; }
+.g-note { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 8px 40px; align-items: end; }
+.g-note b { display: block; margin-top: 6px; font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; }
+.g-note p { font-size: 16.5px; color: var(--ink-2); }
+.changed.row { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 28px; }
+.changed.row .lbl { grid-column: 1 / -1; }
+.changed.row > div { border-bottom: 0; }
+
+/* skills */.skills { background: var(--tint); border-top: 1px solid var(--rule); }
+.skills .wrap { padding-block: 96px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 48px; }
+.skills h2 { font-size: clamp(36px, 5vw, 56px); font-weight: 600; letter-spacing: -0.05em; line-height: 1; margin-top: 14px; }
+.skills .intro p { margin-top: 16px; color: var(--ink-2); font-size: 17px; }
+.matrix-card { background: var(--paper); border: 1px solid var(--rule); border-radius: 16px; padding: 12px 28px 24px; }
+.matrix { width: 100%; border-collapse: collapse; font-size: 16px; }
+.matrix th { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); text-align: center; padding: 14px 8px 12px; border-bottom: 1px solid var(--ink); width: 19%; }
+.matrix th:first-child { width: 43%; }
+.matrix th:first-child, .matrix td:first-child { text-align: left; padding-left: 0; }
+.matrix td { padding: 14px 8px; border-bottom: 1px solid var(--rule); text-align: center; }
+.matrix tr:last-child td { border-bottom: 0; }
+.matrix tbody tr:hover td { background: var(--tint); }
+.dotm { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: var(--blue); }
+.dotm.o { background: transparent; border: 1.5px solid var(--ink-3); }
+
+footer { background: var(--ink); color: #6f7a89; font-size: 13px; }
+footer .wrap { padding-block: 28px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+
+/* tooltip */
+.tip { position: fixed; z-index: 60; pointer-events: none; max-width: 260px; padding: 8px 11px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 12.5px; line-height: 1.45; box-shadow: 0 8px 24px rgba(0, 0, 0, .2); font-variant-numeric: tabular-nums; }
+.tip b { font-weight: 600; }
+
+/* ── responsive ─────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .ch-body .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .rail { display: none; }
+  .g-note { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 960px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 48px; padding-block: 72px 64px; }
+  .ch-head .wrap { grid-template-columns: minmax(0, 1fr); padding-block: 64px 44px; }
+  .c2, .cols { grid-template-columns: minmax(0, 1fr) !important; }
+  .sticky-col { position: static; }
+  .gaps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .srcflow { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .srcflow .leg { padding: 8px 0 26px; }
+  .srcflow .leg::after { left: 50%; right: auto; bottom: 4px; width: 1.5px; height: 16px; }
+  .srcflow .leg::before { left: 50%; right: auto; bottom: 3px; margin-left: -4px; transform: rotate(135deg); }
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .flow > div, .flow > div + div { border: 1px solid var(--rule); border-radius: 12px; }
+  .flow > div:first-child, .flow > div:last-child { border-radius: 12px; }
+  .flow > div + div::before { display: none; }
+  .skills .wrap { grid-template-columns: minmax(0, 1fr); padding-block: 72px; }
+}
+@media (max-width: 680px) {
+  :root { --nm: 128px; --head: 46px; }
+  body { font-size: 15.5px; }
+  .wrap { padding-inline: 18px; }
+  .sec { padding-block: 52px; gap: 26px; }
+  .stats, .stats.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats > div:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .stats > div:nth-child(n+3) { border-top: 1px solid var(--rule); margin-top: 14px; }
+  .gaps, .gaps.two { grid-template-columns: minmax(0, 1fr); }
+  .question { grid-template-columns: minmax(0, 1fr); padding: 24px 22px; }
+  .hard > div { grid-template-columns: 112px minmax(0, 1fr); gap: 12px; }
+  .hard b { font-size: 20px; }
+  .panel { padding: 18px 16px; }
+  .params { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow, .steps3 { grid-template-columns: minmax(0, 1fr); }
+  .brow { font-size: 12.5px; gap: 8px; }
+  .nm-s, .nm-m { --nm: 128px; }
+  #demand-chart { min-width: 480px; }
+  .swipe { display: block; }
+  .heat { grid-template-columns: 132px repeat(17, minmax(28px, 1fr)); min-width: 760px; font-size: 12px; }
+  .matrix-card { padding: 4px 14px 14px; }
+  .matrix { font-size: 14px; }
+  .matrix th { font-size: 10px; letter-spacing: .03em; padding: 12px 4px 10px; }
+  .matrix td { padding: 12px 4px; }
+  .cta { padding: 20px; }
+  .tabs { width: 100%; }
+  .changed.row { grid-template-columns: minmax(0, 1fr); }
+  .frame .fbar span:last-child { display: none; }
+  .tabs button { flex: 1 1 auto; padding: 8px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav aria-label="Sections">
+      <a href="#haribo">Haribo Demand Planning</a>
+      <a href="#powerbi">Power BI Dashboard</a>
+      <a href="#live">Live Dashboard</a>
+      <a href="#skills">Skills</a>
+    </nav>
+  </div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+</header>
+
+<main id="top">
+  <!-- ═════════════ HERO ═════════════ -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="lbl">Business analytics portfolio · 2026</span>
+        <h1>Md Rifat Hasan</h1>
+        <p class="lede">I turn sales and stock data into purchasing, inventory and commercial decisions at a Bangladesh-based importer and distributor of international food brands. The three case studies below range from a demand-forecasting model used to plan real container orders to a Power BI management report and a near-real-time sales dashboard.</p>
+        <div class="chips" aria-label="Toolkit">
+          <span class="chip">Excel modelling</span><span class="chip">Demand forecasting</span><span class="chip">Inventory planning</span>
+          <span class="chip">Power BI · DAX</span><span class="chip">Data modelling</span><span class="chip">AI-assisted development</span>
+        </div>
+      </div>
+      <div class="pcards">
+        <span class="lbl" style="margin-bottom:4px">Three case studies</span>
+        <a class="pcard" href="#haribo"><span class="n">01</span><span class="t">Haribo demand planning</span><span class="go" aria-hidden="true">→</span><span class="d">Excel forecasting and ordering model</span></a>
+        <a class="pcard" href="#powerbi"><span class="n">02</span><span class="t">Management sales dashboard</span><span class="go" aria-hidden="true">→</span><span class="d">Power BI, DAX and a star-schema model</span></a>
+        <a class="pcard" href="#live"><span class="n">03</span><span class="t">Live GT sales dashboard<span class="tag ai">AI-built</span></span><span class="go" aria-hidden="true">→</span><span class="d">SQL warehouse and web app, built with AI tools</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ 01 · HARIBO ═════════════ -->
+  <section class="chapter" id="haribo">
+    <div class="ch-head">
+      <div class="wrap">
+        <div class="reveal">
+          <span class="ch-num">Case study 01</span>
+          <h2>Haribo demand planning</h2>
+          <p class="summary">An Excel model that decides how much of each of 17 Haribo products goes into each container from Turkey, so that nothing expires and nothing runs out.</p>
+        </div>
+        <dl class="meta reveal">
+          <div><dt>Tool</dt><dd>Excel, all live formulas</dd></div>
+          <div><dt>Data</dt><dd>19 months of sales, 17 products, one 40-ft container</dd></div>
+          <div><dt>Methods</dt><dd>Median baseline · safety stock · shelf-life limit · container allocation</dd></div>
+          <div><dt>Status</dt><dd>Approved for the November 2026 order</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="ch-body">
+      <div class="wrap">
+        <nav class="rail" aria-label="Haribo case study">
+          <span class="lbl">On this case</span>
+          <a href="#haribo-problem">The problem</a>
+          <a href="#haribo-process">The process</a>
+          <a href="#haribo-result">The result</a>
+          <a class="btn ghost dl" href="downloads/Haribo-Demand-Forecast.xlsx" download>Excel model <small>60 KB</small></a>
+        </nav>
+        <div>
+          <!-- problem -->
+          <section class="sec" id="haribo-problem">
+            <div class="sec-head reveal">
+              <span class="stage">The problem</span>
+              <h3>Ordering by experience led to both giveaways and stock-outs</h3>
+              <p class="sub">We import 17 Haribo products from Turkey in one shared 40-ft container. Until 2026, quantities were typed onto the supplier's order form based on experience.</p>
+            </div>
+            <div class="cols reveal" style="grid-template-columns: 1fr 1.15fr; gap: 36px">
+              <div style="display:flex;flex-direction:column;gap:24px">
+                <div class="hard">
+                  <span class="lbl">Why ordering is hard</span>
+                  <div><b>1 container</b><span>every six months. A product left out waits half a year.</span></div>
+                  <div><b>4 months</b><span>at sea. The November 2026 order lands in March 2027.</span></div>
+                  <div><b>5–11 months</b><span>to sell each pack before it gets too close to expiry.</span></div>
+                </div>
+                <div class="gaps two">
+                  <div><span class="lbl">Ordered too much</span><b class="big">13<small>per 100</small></b><p>packs given away free to clear stock, costing 7.7% of Haribo sales revenue</p></div>
+                  <div><span class="lbl">Ordered too little</span><b class="big">6<small>of 17</small></b><p>products out of stock by the end of August</p></div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="p-top"><div><div class="h5">Both problems, product by product</div><p class="small">Free packs given away as % of packs sold, Jan–Aug 2026</p></div>
+                  <div class="legend"><span><i style="background:var(--crit);border-radius:50%"></i>Out of stock by Aug</span></div></div>
+                <div class="bars" id="bogo-sku"></div>
+              </div>
+            </div>
+            <div class="question reveal"><span class="lbl">The question I set out to answer</span><p>How much of each product should go in the next container, so that nothing expires and nothing runs out?</p></div>
+          </section>
+
+          <!-- process -->
+          <section class="sec" id="haribo-process">
+            <div class="sec-head reveal">
+              <span class="stage">The process</span>
+              <h3>An Excel model that asks four questions for every product</h3>
+              <p class="sub">Everything is measured in months of sales, so a 25g pack and a 160g bag can be compared directly.</p>
+              <span class="status"><i></i>Approved for the Nov 2026 order</span>
+            </div>
+
+            <div class="step reveal">
+              <div class="step-head"><span class="k">1</span><h4>Four questions, one worked example</h4><p>The same four questions run for every product. Goldbears 80g shows how the answers turn into an order.</p></div>
+              <div class="cols" style="grid-template-columns: 1fr 1.1fr; gap: 36px">
+                <div class="qs">
+                  <div><span class="n">1</span><b>How much do we sell in a normal month?</b><span>The middle value (median) of 19 months of sales, with free giveaways removed.</span></div>
+                  <div><span class="n">2</span><b>How much do we need until the next container?</b><span>Six months of sales, plus a 10% safety buffer.</span></div>
+                  <div><span class="n">3</span><b>What will still be in stock when it lands?</b><span>Stock today, plus the order already at sea, minus what sells before March.</span></div>
+                  <div><span class="n">4</span><b>How much can we sell before it expires?</b><span>Shelf life, minus 4 months at sea, minus 3 months that shops need in hand.</span></div>
+                </div>
+                <div class="panel sticky-col">
+                  <span class="lbl">Worked example</span><div class="h5" style="margin-top:4px">Goldbears 80g</div>
+                  <div class="calc">
+                    <div><span>Needed until the next container (6 months + 10%)</span><b>6.6</b></div>
+                    <div><span>Still in stock when the container lands</span><b>− 3.3</b></div>
+                    <div class="tot"><span>Must order at least</span><b>3.3</b></div>
+                    <div><span>Most it can sell before expiry: 11 − 3.3</span><b>7.7</b></div>
+                    <div class="tot"><span>Ordered, after sharing spare space</span><b class="blue">5.4</b></div>
+                  </div>
+                  <div class="scroll"><div class="ruler-wrap"><div class="ruler" id="ruler"></div><div class="ruler-scale" id="ruler-scale"></div></div></div>
+                  <p style="margin-top:16px;font-size:15px"><b>Result:</b> it lands with <b>8.7 months</b> of stock. That is enough to reach the next container, and it can all be sold before expiry.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="step reveal">
+              <div class="step-head"><span class="k">2</span><h4>Normal monthly sales: using the median, not the average</h4><p>Monthly sales jump around. Spikes pull an average up, and the business would order too much again. The median, the middle month, ignores both spikes and dips.</p></div>
+              <div class="cols" style="grid-template-columns: 1.3fr 1fr; align-items: start">
+                <div class="panel">
+                  <div class="p-top">
+                    <div><div class="h5">Goldbears 160g, monthly sales</div><p class="small">100 = a normal (median) month · Jan 2025 – Aug 2026</p></div>
+                    <div class="legend"><span><i style="background:var(--blue)"></i>Monthly sales</span><span><i class="line" style="background:var(--ink-3)"></i>Median</span><span><i class="line" style="background:var(--orange)"></i>Average</span></div>
+                  </div>
+                  <div class="scroll"><div id="demand-chart"></div></div>
+                </div>
+                <div class="panel">
+                  <div class="h5">If we had used the average</div><p class="small">How far above a normal month it would sit, by product</p>
+                  <div class="bars nm-s" id="mvm" style="margin-top:16px"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step reveal">
+              <div class="step-head"><span class="k">3</span><h4>One container, 17 products, shared fairly</h4><p>The must-order amounts filled 71% of the container. The model shares the other 29%: each product gets the same fraction (47%) of its room before the expiry limit.</p></div>
+              <div class="cols" style="grid-template-columns: 1fr 1.15fr; gap: 28px">
+                <div style="display:flex;flex-direction:column;gap:24px">
+                  <div class="panel">
+                    <div class="h5">The 40-ft container</div><p class="small">Share of its 60.85 m³</p>
+                    <div class="legend" style="margin-top:12px"><span><i style="background:var(--blue)"></i>Must order 71%</span><span><i style="background:var(--blue-soft)"></i>Shared spare space 29%</span><span><i style="border:1.5px dashed var(--ink-3)"></i>Allowed by expiry limits, 132%</span></div>
+                    <div class="cont-bar" id="cont-bar" role="img" aria-label="Container: 71% must order, 29% shared spare space, 132% allowed by expiry limits"></div>
+                    <div class="cont-scale" id="cont-scale"></div>
+                    <p class="small" style="margin-top:12px">Expiry limits would allow 132% of a container, more than fits. Sharing the gap evenly means no product is favoured and the box ships full.</p>
+                  </div>
+                  <div><span class="lbl">Inputs the business can change</span>
+                    <div class="params two">
+                      <div><span class="lbl">Months to cover</span><b>6</b></div>
+                      <div><span class="lbl">Safety buffer</span><b>10%</b></div>
+                      <div><span class="lbl">Growth plan</span><b>0–10%</b></div>
+                      <div><span class="lbl">Container</span><b>60.85 m³</b></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="h5">Months of stock when the container lands</div><p class="small">March 2027, by product</p>
+                  <div class="legend" style="margin:12px 0 10px"><span><i style="background:var(--blue-soft)"></i>Still in stock</span><span><i style="background:var(--blue)"></i>This order</span><span><i style="background:var(--orange);width:3px"></i>Expiry limit</span><span><i style="background:var(--ink);width:2px"></i>Next container</span></div>
+                  <div class="bars nm-m" id="cover-bars"></div>
+                  <p class="small" style="margin-top:12px">Every gummy lands with 8.7 months, enough to reach September. Marshmallows have a shorter shelf life, so they stop at 5.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- result -->
+          <section class="sec" id="haribo-result">
+            <div class="sec-head reveal">
+              <span class="stage">The result</span>
+              <h3>A plan management approved</h3>
+              <p class="sub">The November 2026 order follows the model. Below is the stock it projects for each product until the end of 2027.</p>
+            </div>
+            <div class="stats reveal">
+              <div><b>0</b><span>products ordered beyond what can be sold before expiry</span></div>
+              <div><b>15<small>of 15</small></b><span>gummy products stay in stock from March until the next container</span></div>
+              <div><b>99.9<small>%</small></b><span>of the container used</span></div>
+              <div><b>1 file</b><span>replaces hand-typed orders, and can be rerun every six months</span></div>
+            </div>
+            <div class="panel reveal">
+              <div class="p-top"><div class="h5">Projected months of stock, by product</div><div class="heat-legend" id="heat-legend"></div></div>
+              <p class="small swipe">Swipe sideways to see every month.</p>
+              <div class="scroll"><div class="heat" id="heat"></div></div>
+            </div>
+            <div class="cta reveal">
+              <p><b>Explore the model in Excel.</b> Every step is a live formula: change the months to cover or the safety buffer and the order updates. Sales figures in the file are sanitised.</p>
+              <a class="btn" href="downloads/Haribo-Demand-Forecast.xlsx" download>Download .xlsx <small>60 KB</small></a>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ 02 · POWER BI ═════════════ -->
+  <section class="chapter" id="powerbi">
+    <div class="ch-head">
+      <div class="wrap">
+        <div class="reveal">
+          <span class="ch-num">Case study 02</span>
+          <h2>Management sales dashboard</h2>
+          <p class="summary">A one-page Power BI report that shows management sales against target and last year, by month, brand, channel and partner.</p>
+        </div>
+        <dl class="meta reveal">
+          <div><dt>Tools</dt><dd>Power BI · DAX · star-schema data model</dd></div>
+          <div><dt>Data</dt><dd>Jan 2025 to Sep 2026 · 11 brands · 5 channels · 229 SKUs</dd></div>
+          <div><dt>Output</dt><dd>One report, with seven slicers, for the whole management team</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="ch-body">
+      <div class="wrap">
+        <nav class="rail" aria-label="Power BI case study">
+          <span class="lbl">On this case</span>
+          <a href="#powerbi-problem">The problem</a>
+          <a href="#powerbi-solution">The solution</a>
+          <a href="#powerbi-result">The result</a>
+          <a class="btn ghost dl" href="downloads/FMCG-Sales-Report.pbix" download>Power BI file <small>6.4 MB</small></a>
+        </nav>
+        <div>
+          <!-- problem -->
+          <section class="sec" id="powerbi-problem">
+            <div class="sec-head reveal">
+              <span class="stage">The problem</span>
+              <h3>Sales figures came from three places, and they didn't agree</h3>
+              <p class="sub">Before the dashboard, I put together the management sales report by hand every month. The figures came from Excel files, ERP reports and numbers sent in by the sales team.</p>
+            </div>
+            <div class="srcflow reveal">
+              <div class="stack">
+                <div class="node"><span class="lbl">Source 1</span><b>Excel exports</b></div>
+                <div class="node"><span class="lbl">Source 2</span><b>ERP standard reports</b></div>
+                <div class="node"><span class="lbl">Source 3</span><b>Sales team, on request</b></div>
+              </div>
+              <div class="leg"><b>by hand</b><span>every month</span></div>
+              <div class="node hand"><span class="lbl">Monthly report</span><b>Excel pack, compiled by me</b><span>Fixed tables. A new view meant a new sheet.</span></div>
+              <div class="leg"><b>once a month</b><span>snapshot</span></div>
+              <div class="node"><span class="lbl">Management</span><b>Monthly sales review</b></div>
+            </div>
+            <div class="blk reveal">
+              <span class="lbl">What management couldn't see easily</span>
+              <div class="gaps">
+                <div><span class="lbl">Gap 1</span><b>Sales against target</b><p>Achievement by channel, brand or partner needed its own sheet.</p></div>
+                <div><span class="lbl">Gap 2</span><b>This year against last</b><p>Each comparison with the same period last year was extra manual work.</p></div>
+                <div><span class="lbl">Gap 3</span><b>Their own drill-down</b><p>A new question, such as one brand in one channel, meant a new request and a new sheet.</p></div>
+                <div><span class="lbl">Gap 4</span><b>One set of numbers</b><p>Figures from different sources didn't match, so meetings spent time on which number was right.</p></div>
+              </div>
+            </div>
+            <div class="question reveal"><span class="lbl">The question I set out to answer</span><p>How can management see sales against target and last year, at any level, from one set of numbers?</p></div>
+          </section>
+
+          <!-- solution -->
+          <section class="sec" id="powerbi-solution">
+            <div class="sec-head reveal">
+              <span class="stage">The solution</span>
+              <h3>One Power BI report on a star-schema data model</h3>
+              <p class="sub">One sales fact table, six lookup tables, and DAX measures that compare any period with the same period last year.</p>
+            </div>
+            <div class="stats reveal">
+              <div><b>2025–26</b><span>transaction years modelled, Jan 2025 to Sep 2026</span></div>
+              <div><b>11 · 5</b><span>brands and sales channels, 229 SKUs</span></div>
+              <div><b>73.7<small>%</small></b><span>of the Jan–Sep 2026 target reached</span></div>
+              <div><b>+31.2<small>%</small></b><span>sales growth on Jan–Sep 2025</span></div>
+            </div>
+            <div class="cols reveal" style="grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: start">
+              <div style="display:grid;gap:20px">
+                <div class="panel"><div class="h5">Data model</div><p>A star schema around one sales fact table</p><div id="star" style="margin-top:10px"></div></div>
+                <div class="panel" style="display:grid;gap:14px">
+                  <div><div class="h5">DAX measures</div><p class="small">Time intelligence compares any period with the same period last year</p></div>
+                  <div class="chips"><span class="chip">Total Sales</span><span class="chip">Total Target</span><span class="chip">Achievement %</span><span class="chip">CY Sales</span><span class="chip">LY Sales</span><span class="chip">YoY Growth %</span><span class="chip">CY Sales YTD</span><span class="chip">YoY Growth YTD</span><span class="chip">Total Qty Sold</span><span class="chip">Sales (Tons)</span></div>
+                  <div><span class="lbl">Slicers</span><div class="chips" style="margin-top:8px"><span class="chip">Year</span><span class="chip">Quarter</span><span class="chip">Month</span><span class="chip">Week</span><span class="chip">Channel</span><span class="chip">Brand</span><span class="chip">Partner</span></div></div>
+                </div>
+              </div>
+              <figure class="frame sticky-col">
+                <div class="fbox">
+                  <div class="fbar"><span>Full report</span><span>Scroll inside ↕</span></div>
+                  <div class="scrollbox" tabindex="0" aria-label="The full Power BI report, scrollable"><img src="img/pbi-full.png" alt="The full one-page Power BI report" loading="lazy" width="1086" height="3412"></div>
+                </div>
+                <figcaption><b>The full report</b>, one scrolling page.</figcaption>
+              </figure>
+            </div>
+            <div class="cta reveal">
+              <p><b>Open it in Power BI Desktop.</b> The report file uses sanitised data: partner names are replaced and values are rescaled.</p>
+              <a class="btn" href="downloads/FMCG-Sales-Report.pbix" download>Download .pbix <small>6.4 MB</small></a>
+            </div>
+          </section>
+
+          <!-- result -->
+          <section class="sec" id="powerbi-result">
+            <div class="sec-head reveal">
+              <span class="stage">The result</span>
+              <h3>One report everyone agrees on, instead of a monthly Excel pack</h3>
+              <p class="sub">Management now works from one set of numbers. The report updates when the data refreshes, so I no longer compile the pack by hand. And it showed general trade overtaking modern trade.</p>
+            </div>
+            <div class="stats reveal">
+              <div><b>73.7<small>%</small></b><span>of the Jan–Sep target reached across all channels</span></div>
+              <div><b>+31<small>%</small></b><span>sales growth on the same months of 2025. The −10.4% card compares nine months of 2026 with all of 2025.</span></div>
+              <div><b>+139<small>%</small></b><span>February, the strongest month on last year. Only July and August were down.</span></div>
+              <div><b>7</b><span>slicers, so any manager can cut the page to their own channel, brand or partner</span></div>
+            </div>
+            <div class="gallery reveal" id="pbi-gallery">
+              <div class="tabs" role="tablist" aria-label="Report views"></div>
+              <div class="g-note" aria-live="polite"><div><span class="lbl" id="g-k"></span><b id="g-t"></b></div><p id="g-d"></p></div>
+              <figure class="frame">
+                <div class="fbox">
+                  <div class="fbar"><span>Power BI report</span><span>Click to enlarge ↗</span></div>
+                  <button type="button" data-lightbox aria-label="Open image full size"><img id="g-img" src="img/pbi-channel.png" alt="" loading="lazy"></button>
+                </div>
+              </figure>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ 03 · LIVE GT ═════════════ -->
+  <section class="chapter" id="live">
+    <div class="ch-head">
+      <div class="wrap">
+        <div class="reveal">
+          <span class="ch-num">Case study 03 · Built with AI tools</span>
+          <h2>Live GT sales dashboard<span class="tag ai">AI-built</span></h2>
+          <p class="summary">A near-real-time dashboard for the general-trade sales team that replaced a manual Excel report and sizes distributor orders on real demand. I built it with AI coding assistants. I directed the work and checked every number.</p>
+        </div>
+        <dl class="meta reveal">
+          <div><dt>Stack</dt><dd>ERP API · PostgreSQL · Next.js web app</dd></div>
+          <div><dt>Built</dt><dd>March 2026, with AI coding assistants</dd></div>
+          <div><dt>Refresh</dt><dd>Every 5 minutes, from order to dashboard</dd></div>
+          <div><dt>Users</dt><dd>General-trade sales team</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="ch-body">
+      <div class="wrap">
+        <nav class="rail" aria-label="Live dashboard case study">
+          <span class="lbl">On this case</span>
+          <a href="#live-problem">The problem</a>
+          <a href="#live-process">The process</a>
+          <a href="#live-result">The result</a>
+          <a class="btn ghost dl" href="gt-demo.html">Live demo <small>→</small></a>
+        </nav>
+        <div>
+          <!-- problem -->
+          <section class="sec" id="live-problem">
+            <div class="sec-head reveal">
+              <span class="stage">The problem</span>
+              <h3>A day-old sales report, and distributor orders based on judgment</h3>
+              <p class="sub">The general-trade team relied on a daily Excel report that the sales admin team rebuilt every day from ERP exports. Distributors decided their own primary orders without our demand data.</p>
+            </div>
+            <div class="blk reveal">
+              <span class="lbl">Sales reporting</span>
+              <div class="srcflow">
+                <div class="node"><span class="lbl">Source</span><b>ERP exports</b><span>Orders, deliveries and stock</span></div>
+                <div class="leg"><b>by hand</b><span>every day</span></div>
+                <div class="node hand"><span class="lbl">Daily report</span><b>Excel file, rebuilt by sales admin</b><span>Sales only. No stock or order view.</span></div>
+                <div class="leg"><b>a day late</b><span>yesterday's position</span></div>
+                <div class="node"><span class="lbl">Users</span><b>General-trade sales team</b></div>
+              </div>
+            </div>
+            <div class="blk reveal">
+              <span class="lbl">Primary orders (what distributors buy from us)</span>
+              <div class="srcflow">
+                <div class="node"><span class="lbl">Distributor</span><b>Own judgment</b><span>No view of its demand against its stock</span></div>
+                <div class="leg"><b>guessed</b><span>quantities</span></div>
+                <div class="node hand"><span class="lbl">Primary order</span><b>Not sized on demand</b><span>Too little of some products, too much of others</span></div>
+                <div class="leg"><b>result</b><span>at the distributor</span></div>
+                <div class="node"><span class="lbl">Distributor stock</span><b>Gaps and pile-ups</b></div>
+              </div>
+            </div>
+            <div class="blk reveal">
+              <span class="lbl">What went wrong</span>
+              <div class="gaps">
+                <div><span class="lbl">Gap 1</span><b>Always a day behind</b><p>The team couldn't see today's orders, so they couldn't react during the day.</p></div>
+                <div><span class="lbl">Gap 2</span><b>Hours of manual work</b><p>Exporting, pasting and checking took a large part of the team's day, every day.</p></div>
+                <div><span class="lbl">Gap 3</span><b>Stock-outs at distributors</b><p>Popular products ran out, so the sales force couldn't fill shop orders.</p></div>
+                <div><span class="lbl">Gap 4</span><b>Overstock of slow lines</b><p>Distributors held too much of slow products, tying up money and risking expiry.</p></div>
+              </div>
+            </div>
+            <div class="question reveal"><span class="lbl">The question I set out to answer</span><p>How can the team see today's sales and stock, and size each distributor's order on real demand, without anyone rebuilding a report?</p></div>
+          </section>
+
+          <!-- process -->
+          <section class="sec" id="live-process">
+            <div class="sec-head reveal">
+              <span class="stage">The process</span>
+              <h3>A live dashboard built with AI coding tools, checked by me</h3>
+              <p class="sub">The AI tools wrote much of the code. The analytical judgement, the metric definitions and the checking were mine.</p>
+              <span class="status"><i></i>Built March 2026</span>
+            </div>
+            <div class="stats three reveal">
+              <div><b>5<small>min</small></b><span>from an order in the ERP to the dashboard</span></div>
+              <div><b>0</b><span>differences from the Excel report it replaced</span></div>
+              <div><b>12</b><span>ERP data streams kept in sync</span></div>
+            </div>
+            <div class="blk reveal"><span class="lbl">How the data flows</span>
+              <div class="flow">
+                <div><span class="lbl">Source</span><b>ERP API + finance Excel</b><span>Orders, deliveries, stock, targets. Primary sales arrive as a validated upload.</span></div>
+                <div><span class="lbl">Sync</span><b>Every 5 minutes</b><span>Changed rows only, plus a nightly sweep that catches deleted records.</span></div>
+                <div><span class="lbl">Warehouse</span><b>PostgreSQL</b><span>Business rules live in SQL, defined once.</span><span class="layers"><em>raw</em><em>staging</em><em>core</em><em>mart</em></span></div>
+                <div><span class="lbl">Output</span><b>Web dashboard</b><span>Targets, pace, deliveries, stock cover and a shop map.</span></div>
+              </div>
+            </div>
+            <div class="cols reveal" style="grid-template-columns: 1.2fr 1fr">
+              <div class="panel who"><div class="h5">My part</div><ul>
+                <li>Defined the metrics: monthly pace, 10-day block targets, days of stock cover</li>
+                <li>Chose to measure demand from orders, since deliveries undercount when stock runs out</li>
+                <li>Rebuilt the old Excel report's logic and matched it row by row</li>
+                <li>Reviewed, tested and corrected the generated code and SQL</li>
+              </ul></div>
+              <div class="panel who ai soft"><div class="h5">AI coding assistants</div><ul>
+                <li>Wrote most of the application and interface code</li>
+                <li>Drafted SQL and automated tests for me to review</li>
+                <li>Worked as a pair programmer throughout</li>
+              </ul></div>
+            </div>
+          </section>
+
+          <!-- result -->
+          <section class="sec" id="live-result">
+            <div class="sec-head reveal">
+              <span class="stage">The result</span>
+              <h3>Distributor orders sized on real demand, with sales updated every 5 minutes</h3>
+            </div>
+            <figure class="frame reveal">
+              <div class="fbox">
+                <div class="fbar"><span>Live dashboard · Primary order plan</span><span>Click to enlarge ↗</span></div>
+                <button type="button" data-lightbox aria-label="Open the primary order plan full size"><img src="img/gt-order-plan.png" alt="Primary order plan table with stock status, daily demand, days of cover and suggested order quantity" loading="lazy" width="1408" height="900"></button>
+              </div>
+              <figcaption><b>Primary order plan.</b> A suggested order for every distributor and product, with stock status and days of cover.</figcaption>
+            </figure>
+            <div class="changed row reveal">
+              <span class="lbl">What changed</span>
+              <div><b>Primary orders</b><span>The sales team now uses the suggested quantities as the basis for each distributor order.</span></div>
+              <div><b>Fewer stock-outs</b><span>Distributors run out of popular products less often.</span></div>
+              <div><b>5 min</b><span>from an order in the ERP to the dashboard. No one rebuilds a daily report.</span></div>
+            </div>
+            <div class="blk reveal"><span class="lbl">How the order plan sizes each order</span>
+              <div class="steps3">
+                <div><span class="k">1 · Demand</span><b>What the sales force ordered</b><span>Each distributor's orders over the last 7, 14 or 30 days. Orders, not deliveries, so stock-outs don't hide demand.</span></div>
+                <div><span class="k">2 · Target</span><b>Days of stock to hold</b><span>7, 14 or 21 days of cover, set by the sales team.</span></div>
+                <div><span class="k">3 · Order</span><b>The gap, in whole cartons</b><span>Demand for the target period, minus stock on hand, rounded up to full cartons.</span></div>
+              </div>
+            </div>
+            <figure class="frame reveal">
+              <div class="fbox">
+                <div class="fbar"><span>Live dashboard · Overview</span><span>Click to enlarge ↗</span></div>
+                <button type="button" data-lightbox aria-label="Open the dashboard overview full size"><img src="img/gt-overview.png" alt="Dashboard overview with achievement cards and a distributor leaderboard" loading="lazy" width="1440" height="900"></button>
+              </div>
+              <figcaption><b>Overview.</b> Sales against target, paced against working days gone. Screens use synthetic data.</figcaption>
+            </figure>
+            <div class="cta reveal">
+              <p><b>Try the dashboard yourself.</b> A full replica runs in your browser on synthetic data, with filters, the order plan, maps and tables.</p>
+              <a class="btn" href="gt-demo.html">Open the interactive demo →</a>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ SKILLS ═════════════ -->
+  <section class="skills" id="skills">
+    <div class="wrap">
+      <div class="intro reveal">
+        <span class="ch-num">Across the three projects</span>
+        <h2>Skills in practice</h2>
+        <p>Where each skill did the main work, and where it played a supporting part.</p>
+        <div class="legend" style="margin-top:18px"><span><span class="dotm" style="margin-right:6px;vertical-align:-1px"></span>Core to the project</span><span><span class="dotm o" style="margin-right:6px;vertical-align:-1px"></span>Used</span></div>
+      </div>
+      <div class="matrix-card reveal">
+        <table class="matrix">
+          <thead><tr><th>Skill</th><th>Haribo planning</th><th>Power BI report</th><th>Live dashboard</th></tr></thead>
+          <tbody id="matrix"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Md Rifat Hasan</span>
+  </div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="Image viewer">
+  <div class="lb-bar"><span id="lb-cap"></span><button class="lb-close" type="button" id="lb-close">Close ✕</button></div>
+  <img id="lb-img" alt="">
+</dialog>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  /* Ratios only: S = months of stock when the March container lands; v = % of the container
+     one month of sales takes; sell = months sellable before expiry; mv = average vs median (%);
+     h = projected months of stock at each month end, Aug 2026 – Dec 2027. */
+  const SKUS = [
+{"n":"Chamallows Pink & White 70g","c":"A","sell":5,"S":1.026,"v":2.09,"mv":-0.4,"h":[0.0,0.0,5.0,4.0,3.0,2.0,1.0,4.0,3.0,2.0,1.0,0.0,0.0,4.0,3.0,2.0,1.0]},
+{"n":"Happy Cola 80g","c":"A","sell":11,"S":3.268,"v":1.008,"mv":3.1,"h":[0.0,0.0,7.3,6.3,5.3,4.3,3.3,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Goldbears 25g","c":"A","sell":11,"S":3.092,"v":1.575,"mv":9.0,"h":[2.4,1.4,7.1,6.1,5.1,4.1,3.1,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Starmix 80g","c":"A","sell":11,"S":3.967,"v":1.186,"mv":17.4,"h":[4.3,3.3,8.0,7.0,6.0,5.0,4.0,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Goldbears 80g","c":"A","sell":11,"S":3.326,"v":1.988,"mv":7.7,"h":[2.8,1.8,7.3,6.3,5.3,4.3,3.3,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Happy Cola 25g","c":"A","sell":11,"S":3.857,"v":1.166,"mv":8.6,"h":[2.6,1.6,7.9,6.9,5.9,4.9,3.9,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Mix Zourr 80g","c":"B","sell":11,"S":1.869,"v":0.638,"mv":5.7,"h":[4.4,3.4,5.9,4.9,3.9,2.9,1.9,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Starmix 160g","c":"B","sell":11,"S":0.543,"v":0.614,"mv":15.0,"h":[1.1,0.1,4.5,3.5,2.5,1.5,0.5,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Worms 80g","c":"B","sell":11,"S":3.016,"v":1.298,"mv":11.3,"h":[2.9,1.9,7.0,6.0,5.0,4.0,3.0,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Worm Zourr 80g","c":"B","sell":11,"S":0.375,"v":0.85,"mv":5.7,"h":[1.1,0.1,4.4,3.4,2.4,1.4,0.4,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Goldbears 160g","c":"B","sell":11,"S":0.176,"v":1.228,"mv":45.2,"h":[0.0,0.0,4.2,3.2,2.2,1.2,0.2,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Chamallows Pink & White 150g","c":"B","sell":5,"S":0.621,"v":0.416,"mv":33.0,"h":[2.0,1.0,4.6,3.6,2.6,1.6,0.6,4.0,3.0,2.0,1.0,0.0,0.0,3.9,2.9,1.9,0.9]},
+{"n":"Happy Cola 160g","c":"C","sell":11,"S":1.283,"v":0.634,"mv":7.3,"h":[2.0,1.0,5.3,4.3,3.3,2.3,1.3,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Happy Cola Zourr 160g","c":"C","sell":11,"S":0.626,"v":0.282,"mv":27.6,"h":[0.0,0.0,4.6,3.6,2.6,1.6,0.6,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Happy Cola Zourr 80g","c":"C","sell":11,"S":1.251,"v":0.511,"mv":-5.4,"h":[3.6,2.6,5.3,4.3,3.3,2.3,1.3,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Peaches 80g","c":"C","sell":11,"S":0.0,"v":0.426,"mv":18.1,"h":[0.0,0.0,2.9,1.9,0.9,0.0,0.0,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]},
+{"n":"Happy Grapes 80g","c":"C","sell":11,"S":0.0,"v":0.586,"mv":17.2,"h":[0.0,0.0,2.8,1.8,0.8,0.0,0.0,7.7,6.7,5.7,4.7,3.7,2.7,7.9,6.9,5.9,4.9]}
+  ];
+  const GB160 = [148,83,92,93,170,78,190,266,216,91,265,189,101,68,99,83,52,310,168,-10];
+  const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const fmt1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
+  const axis = (ticks, pos, label) => `<div class="axisrow" aria-hidden="true"><span></span><div class="ax">${ticks.map((t) => `<span style="left:${pos(t)}%;${pos(t) === 0 ? "transform:none" : pos(t) >= 100 ? "transform:translateX(-100%)" : ""}">${label(t)}</span>`).join("")}</div><span></span></div>`;
+
+  /* ── tooltip ── */
+  const tip = $("tip");
+  function place(x, y) { const w = tip.offsetWidth, h = tip.offsetHeight; tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, x + 14)) + "px"; tip.style.top = (y + 18 + h > innerHeight ? y - h - 12 : y + 18) + "px"; }
+  document.addEventListener("pointerover", (e) => { const t = e.target.closest("[data-tip]"); if (t) { tip.innerHTML = t.getAttribute("data-tip"); tip.hidden = false; place(e.clientX, e.clientY); } else tip.hidden = true; });
+  document.addEventListener("pointermove", (e) => { if (!tip.hidden) place(e.clientX, e.clientY); });
+  addEventListener("scroll", () => { tip.hidden = true; }, { passive: true });
+
+  /* ── giveaways by product ── */
+  (function () {
+    const B = [["Happy Cola 80g", 24.7, 1], ["Peaches 80g", 21.4, 1], ["Happy Cola Zourr 160g", 19.6, 1], ["Happy Cola Zourr 80g", 19.4, 0],
+      ["Mix Zourr 80g", 17.9, 0], ["Happy Cola 160g", 17.6, 0], ["Goldbears 80g", 16.8, 0], ["Happy Grapes 80g", 14.8, 1],
+      ["Starmix 160g", 13.9, 0], ["Worm Zourr 80g", 12.7, 0], ["Worms 80g", 12.4, 0], ["Happy Cola 25g", 12.1, 0],
+      ["Starmix 80g", 10.8, 0], ["Goldbears 25g", 9.6, 0], ["Chamallows Pink & White 70g", 6.6, 1], ["Chamallows Pink & White 150g", 5.2, 0], ["Goldbears 160g", 1.4, 1]];
+    const MAX = 25, tk = (v) => (v / MAX) * 100;
+    $("bogo-sku").innerHTML = axis([0, 10, 20], tk, (t) => t + "%") + B.map(([n, v, oos]) => `<div class="brow" data-tip="<b>${esc(n)}</b><br>${fmt1(v)} free packs per 100 sold${oos ? "<br>Out of stock by August" : ""}"><span class="nm">${esc(n)}${oos ? '<i class="oos" aria-label="out of stock by August"></i>' : ""}</span>
+      <div class="track">${[5, 10, 15, 20].map((t) => `<i class="gl" style="left:${tk(t)}%"></i>`).join("")}<i style="left:0;width:${tk(v)}%;background:var(--orange);border-radius:0 3px 3px 0"></i></div>
+      <span class="val">${fmt1(v)}</span></div>`).join("");
+  })();
+
+  /* ── plan at the approved settings: 6 months + 10% ── */
+  const dem = 6 * 1.1;
+  const rows = SKUS.map((k) => { const mn = Math.max(0, Math.min(dem, k.sell) - k.S); const mx = Math.max(mn, k.sell - k.S); return { k, mn, mx }; });
+  const minL = rows.reduce((a, r) => a + r.mn * r.k.v, 0), maxL = rows.reduce((a, r) => a + r.mx * r.k.v, 0);
+  const f = Math.max(0, Math.min(1, (100 - minL) / (maxL - minL)));
+  rows.forEach((r) => { r.ord = r.mn + f * (r.mx - r.mn); r.cover = r.k.S + r.ord; });
+  const used = rows.reduce((a, r) => a + r.ord * r.k.v, 0);
+
+  /* ── worked example ruler: Goldbears 80g ── */
+  (function () {
+    const g = rows.find((r) => r.k.n === "Goldbears 80g"), MAX = 12, x = (v) => (v / MAX) * 100;
+    const a = g.k.S, b = g.mn, c = g.ord - g.mn;
+    $("ruler").innerHTML =
+      `<i style="left:0;width:${x(a)}%;background:var(--blue-soft);color:var(--h5);border-radius:8px 0 0 8px">in stock ${fmt1(a)}</i>` +
+      `<i style="left:calc(${x(a)}% + 2px);width:calc(${x(b)}% - 2px);background:var(--blue);color:#fff">must order ${fmt1(b)}</i>` +
+      `<i style="left:calc(${x(a + b)}% + 2px);width:calc(${x(c)}% - 2px);background:var(--h4);color:#fff">+${fmt1(c)}</i>` +
+      `<i class="mk" style="left:calc(${x(6.6)}% - 1px);background:var(--ink)"><span>needed 6.6</span></i>` +
+      `<i class="mk" style="left:calc(${x(g.k.sell)}% - 1px);background:var(--orange)"><span style="color:var(--orange);left:auto;right:-1px;transform:none">expiry limit 11</span></i>`;
+    $("ruler-scale").innerHTML = [0, 3, 6, 9, 12].map((t) => `<span style="left:${x(t)}%;${t === 0 ? "transform:none" : t === 12 ? "transform:translateX(-100%)" : ""}">${t} mo</span>`).join("");
+  })();
+
+  /* ── demand chart ── */
+  (function () {
+    const W = 640, H = 270, m = { l: 36, r: 78, t: 18, b: 26 };
+    const w = W - m.l - m.r, h = H - m.t - m.b, lo = -50, hi = 350, n = GB160.length;
+    const win = GB160.slice(1, 19), mean = win.reduce((a, b) => a + b, 0) / win.length;
+    const x = (i) => m.l + (i * w) / (n - 1), y = (v) => m.t + h - ((v - lo) / (hi - lo)) * h;
+    const lab = (i) => `${MN[i % 12]} ${25 + Math.floor(i / 12)}`;
+    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Goldbears 160g monthly sales index with median 100 and average ${Math.round(mean)}">`;
+    for (let v = lo; v <= hi; v += 50) s += `<line class="${v === 0 ? "base" : "grid"}" x1="${m.l}" x2="${m.l + w}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 3.5}" text-anchor="end">${v}</text>`;
+    GB160.forEach((_, i) => { const d = i % 12; if (i % 3 === 0 || i === n - 1) s += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${d === 0 ? "Jan " + (25 + Math.floor(i / 12)) : MN[d]}</text>`; });
+    s += `<line x1="${m.l}" x2="${m.l + w}" y1="${y(100)}" y2="${y(100)}" stroke="var(--ink-3)" stroke-width="1.4"/><text x="${m.l + w + 6}" y="${y(100) + 11}" style="fill:var(--ink-2)">Median 100</text>`;
+    s += `<line x1="${m.l}" x2="${m.l + w}" y1="${y(mean)}" y2="${y(mean)}" stroke="var(--orange)" stroke-width="1.4"/><text x="${m.l + w + 6}" y="${y(mean) - 3}" style="fill:var(--orange)">Avg ${Math.round(mean)}</text>`;
+    const pts = GB160.map((v, i) => [x(i), y(v)]);
+    const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
+    s += `<path d="${d}L${pts[n - 1][0]},${y(0)}L${pts[0][0]},${y(0)}Z" fill="var(--blue)" opacity=".08"/><path d="${d}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>`;
+    pts.forEach((p) => (s += `<circle cx="${p[0]}" cy="${p[1]}" r="3.2" fill="var(--blue)" stroke="#fff" stroke-width="1.5"/>`));
+    [7, 10, 17].forEach((i) => (s += `<text x="${x(i)}" y="${y(GB160[i]) - 9}" text-anchor="middle" style="fill:var(--ink);font-weight:600">spike</text>`));
+    const band = w / (n - 1);
+    GB160.forEach((v, i) => (s += `<rect class="hit" x="${x(i) - band / 2}" y="${m.t}" width="${band}" height="${h}" data-tip="<b>${lab(i)}</b><br>Index ${v}${v > 180 ? " · spike" : v < 25 ? " · likely stock-out" : ""}"/>`));
+    $("demand-chart").innerHTML = s + "</svg>";
+  })();
+
+  /* ── average vs median by product ── */
+  (function () {
+    const list = SKUS.slice().sort((a, b) => b.mv - a.mv), LO = -10, HI = 50, span = HI - LO, z = (-LO / span) * 100;
+    const pos = (t) => ((t - LO) / span) * 100;
+    let h = axis([0, 50], pos, (t) => (t > 0 ? "+" : "") + t + "%");
+    h += list.map((k) => {
+      const w = (Math.abs(k.mv) / span) * 100, left = k.mv >= 0 ? z : z - w;
+      return `<div class="brow" data-tip="<b>${esc(k.n)}</b><br>Average sits ${k.mv >= 0 ? Math.round(k.mv) + "% above" : Math.abs(Math.round(k.mv)) + "% below"} a normal month"><span class="nm">${esc(k.n)}</span><div class="track"><i class="zero" style="left:${z}%"></i><i style="left:${left}%;width:${w}%;background:${k.mv >= 0 ? "var(--orange)" : "var(--blue)"};border-radius:2px"></i></div><span class="val">${k.mv > 0 ? "+" : ""}${Math.round(k.mv)}%</span></div>`;
+    }).join("");
+    $("mvm").innerHTML = h;
+  })();
+
+  /* ── container bar ── */
+  const SC = 140, pc = (v) => (v / SC) * 100;
+  $("cont-bar").innerHTML =
+    `<i style="left:0;width:${pc(minL)}%;background:var(--blue);border-radius:8px 0 0 8px"></i>` +
+    `<i style="left:calc(${pc(minL)}% + 2px);width:calc(${pc(used - minL)}% - 2px);background:var(--blue-soft)"></i>` +
+    `<i class="out" style="left:${pc(used)}%;width:${pc(maxL - used)}%"></i>` +
+    `<i class="mark" style="left:calc(${pc(100)}% - 1px)"></i>` +
+    `<span style="left:12px;color:#fff">${Math.round(minL)}%</span><span style="left:calc(${pc(minL)}% + 12px);color:var(--h5)">+${Math.round(used - minL)}%</span>`;
+  $("cont-scale").innerHTML = [[0, "0%"], [50, "50%"], [100, "100% · full"], [132.3, "132%"]].map(([p, t]) => `<span style="left:${pc(p)}%;${p === 0 ? "transform:none" : ""}">${t}</span>`).join("");
+
+  /* ── months of stock on arrival ── */
+  (function () {
+    const MAX = 12, tk = (v) => (v / MAX) * 100;
+    let h = axis([0, 6, 12], tk, (t) => t + " mo");
+    h += rows.map((r) => `<div class="brow" data-tip="<b>${esc(r.k.n)}</b><br>Still in stock ${fmt1(r.k.S)} mo<br>This order ${fmt1(r.ord)} mo<br>Lands with ${fmt1(r.cover)} mo · expiry limit ${r.k.sell} mo"><span class="nm">${esc(r.k.n)}</span><div class="track">${[3, 9].map((t) => `<i class="gl" style="left:${tk(t)}%"></i>`).join("")}
+        <i style="left:0;width:${tk(r.k.S)}%;background:var(--blue-soft)"></i>
+        <i style="left:calc(${tk(r.k.S)}% + ${r.k.S > 0.05 ? 2 : 0}px);width:calc(${tk(r.ord)}% - ${r.k.S > 0.05 ? 2 : 0}px);background:var(--blue);border-radius:0 3px 3px 0"></i>
+        <i class="cap" style="left:calc(${tk(r.k.sell)}% - 1px)"></i><i class="cap" style="left:calc(${tk(6)}% - 0.5px);width:1.5px;background:var(--ink)"></i></div><span class="val">${fmt1(r.cover)}</span></div>`).join("");
+    $("cover-bars").innerHTML = h;
+  })();
+
+  /* ── projected stock heatmap ── */
+  (function () {
+    const months = Array.from({ length: 17 }, (_, k) => { const t = 7 + k; return { m: t % 12, y: 26 + Math.floor(t / 12) }; });
+    const ARR = { 2: "In-transit container lands", 7: "This order lands", 13: "Next container lands" };
+    const bin = (v) => (v <= 0 ? 0 : v < 1 ? 1 : v < 3 ? 2 : v < 6 ? 3 : v < 9 ? 4 : 5);
+    const bg = ["var(--crit)", "var(--h1)", "var(--h2)", "var(--h3)", "var(--h4)", "var(--h5)"];
+    let h = `<span></span>` + months.map((d, j) => `<span class="hd${ARR[j] ? " arr" : ""}">${MN[d.m]}<br>${d.y}</span>`).join("");
+    SKUS.forEach((k) => {
+      h += `<span class="nm" title="${esc(k.n)}">${esc(k.n)}</span>`;
+      k.h.forEach((v, j) => { h += `<span class="c${ARR[j] ? " arr" : ""}" style="background:${bg[bin(v)]}" data-tip="<b>${esc(k.n)}</b><br>${MN[months[j].m]} ${months[j].y}: ${v <= 0 ? "out of stock" : fmt1(v) + " months of stock"}${ARR[j] ? "<br>" + ARR[j] : ""}"></span>`; });
+    });
+    $("heat").innerHTML = h;
+    $("heat-legend").innerHTML = [["Out of stock", 0], ["Under 1 month", 1], ["1–3", 2], ["3–6", 3], ["6–9", 4]].map(([t, b]) => `<span><i style="background:${bg[b]}"></i>${t}</span>`).join("") +
+      `<span><i style="background:#fff;box-shadow:inset 0 0 0 2px var(--ink)"></i>Container lands</span>`;
+  })();
+
+  /* ── star schema ── */
+  (function () {
+    const W = 300, H = 190, cx = W / 2, cy = H / 2;
+    const dims = [["Date", "calendar"], ["Target", "by month"], ["Channel", "5 channels"], ["Area", "territory"], ["MRP", "list price"], ["Stock", "on hand"]];
+    const pos = [[44, 28], [cx, 22], [W - 44, 28], [44, H - 28], [cx, H - 22], [W - 44, H - 28]];
+    let s = `<svg class="chart star" viewBox="0 0 ${W} ${H}" role="img" aria-label="Star schema: a sales fact table linked to date, target, channel, area, MRP and stock tables">`;
+    pos.forEach(([x, y]) => (s += `<line class="link" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/>`));
+    s += `<rect class="fact" x="${cx - 52}" y="${cy - 21}" width="104" height="42" rx="4"/><text x="${cx}" y="${cy - 3}" text-anchor="middle" font-size="11" font-weight="600">Sales fact</text><text class="s" x="${cx}" y="${cy + 11}" text-anchor="middle">transactions</text>`;
+    dims.forEach(([n, sub], j) => { const [x, y] = pos[j]; s += `<rect class="dim" x="${x - 40}" y="${y - 16}" width="80" height="32" rx="4"/><text x="${x}" y="${y - 2}" text-anchor="middle" font-size="10" font-weight="600">${n}</text><text class="s" x="${x}" y="${y + 9}" text-anchor="middle">${sub}</text>`; });
+    $("star").innerHTML = s + "</svg>";
+  })();
+
+  /* ── Power BI gallery ── */
+  (function () {
+    const G = [
+      ["Channels", "img/pbi-channel.png", 1972, 685, "General trade passed modern trade", "General trade grew to 45% of sales and passed modern trade. Food service is closest to target at 85%."],
+      ["Brand growth", "img/pbi-yoy-brand.png", 1972, 666, "Laughing Cow more than doubled", "Laughing Cow grew 119% and Davidoff 43%, while Loacker fell 27%."],
+      ["Brand mix", "img/pbi-brand.png", 1972, 684, "Two brands, 61% of sales", "Davidoff makes up 41% of sales and Haribo 20%."],
+      ["Top SKUs", "img/pbi-sku.png", 1972, 889, "Top products by value", "Ranked by value, with units sold inside each bar."],
+      ["Month on month", "img/pbi-mom.png", 1972, 590, "February was up 139%", "2026 against 2025, with growth on the same chart. Only July and August were down."],
+      ["Top of report", "img/pbi-top.png", 1972, 1016, "Target and last year at a glance", "Seven slicers, five KPI cards, and progress against target and last year."],
+    ];
+    const box = $("pbi-gallery"), tabs = box.querySelector(".tabs"), img = $("g-img");
+    tabs.innerHTML = G.map((g, j) => `<button type="button" role="tab" aria-selected="${j === 0}" data-i="${j}">${g[0]}</button>`).join("");
+    function show(j) {
+      const g = G[j];
+      img.src = g[1]; img.width = g[2]; img.height = g[3]; img.alt = g[0] + ": " + g[5];
+      $("g-k").textContent = g[0]; $("g-t").textContent = g[4]; $("g-d").textContent = g[5];
+      tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-selected", String(+b.dataset.i === j)));
+    }
+    tabs.addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (b) show(+b.dataset.i); });
+    tabs.addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      const cur = +tabs.querySelector('[aria-selected="true"]').dataset.i, nx = (cur + (e.key === "ArrowRight" ? 1 : G.length - 1)) % G.length;
+      show(nx); tabs.querySelector(`[data-i="${nx}"]`).focus();
+    });
+    show(0);
+  })();
+
+  /* ── lightbox ── */
+  (function () {
+    const dlg = $("lightbox"), big = $("lb-img");
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-lightbox]"); if (!b) return;
+      const im = b.querySelector("img"); big.src = im.currentSrc || im.src; big.alt = im.alt;
+      const cap = b.closest("figure")?.querySelector("figcaption")?.textContent || im.alt;
+      $("lb-cap").textContent = cap;
+      if (dlg.showModal) dlg.showModal(); else window.open(big.src, "_blank");
+    });
+    $("lb-close").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+  })();
+
+  /* ── skills ── */
+  const SK = [
+    ["Demand forecasting", 2, 0, 1], ["Inventory and supply planning", 2, 0, 1], ["Optimisation under constraints", 2, 0, 0],
+    ["Data cleaning", 2, 1, 1], ["Data modelling", 1, 2, 2], ["Excel modelling", 2, 1, 0],
+    ["Power BI and DAX", 0, 2, 0], ["Dashboard design", 0, 2, 2],
+    ["KPI definition", 1, 2, 2], ["Testing and validation", 1, 0, 2], ["AI-assisted development", 0, 0, 2],
+  ];
+  const dot = (v) => (v === 2 ? '<span class="dotm" aria-label="core"></span>' : v === 1 ? '<span class="dotm o" aria-label="used"></span>' : '<span class="small" aria-label="not used">·</span>');
+  $("matrix").innerHTML = SK.map(([n, a, b, c]) => `<tr><td>${n}</td><td>${dot(a)}</td><td>${dot(b)}</td><td>${dot(c)}</td></tr>`).join("");
+
+  /* ── scroll: progress bar, reveal, active nav and rail ── */
+  const bar = $("progress");
+  const onScroll = () => { const d = document.documentElement; bar.style.width = (d.scrollTop / Math.max(1, d.scrollHeight - d.clientHeight)) * 100 + "%"; };
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if ("IntersectionObserver" in window && !reduce) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  } else document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+  if ("IntersectionObserver" in window) {
+    const mark = (sel, id) => document.querySelectorAll(sel).forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + id));
+    const secIO = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) mark(".rail a[href^='#']", e.target.id); }), { rootMargin: "-40% 0px -55% 0px" });
+    document.querySelectorAll(".sec[id]").forEach((s) => secIO.observe(s));
+    const chIO = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) mark(".top nav a", e.target.id); }), { rootMargin: "-45% 0px -50% 0px" });
+    document.querySelectorAll(".chapter[id], #skills").forEach((s) => chIO.observe(s));
+  }
+})();
+</script>
+</body>
+</html>
