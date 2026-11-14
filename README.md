@@ -1,4 +1,4 @@
-# Md Rifat Hasan · Business Analytics Portfolio (v2)
+# Md Rifat Hasan · Business Analytics Portfolio
 
 A static, single-page case-study site for GitHub Pages. It has no build step and no dependencies apart from Google Fonts.
 
